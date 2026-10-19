@@ -4,52 +4,93 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Radar Minimis{% endblock %}</title>
-  <meta name="description" content="{% block description %}Calcula cuánto minimis le queda a tu empresa y encuentra ayudas abiertas, con datos de la BDNS actualizados a diario.{% endblock %}">
+  <meta name="description" content="{% block description %}Margen de minimis por CIF calculado sobre la BDNS: concesiones de los tres últimos años, topes por régimen y convocatorias abiertas, con actualización diaria.{% endblock %}">
   <link rel="canonical" href="{{ canonical }}">
   <meta property="og:title" content="{{ self.title() }}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:type" content="website">
+  <meta name="theme-color" content="#FAF9F5">
   {% if google_site_verification %}<meta name="google-site-verification" content="{{ google_site_verification }}">{% endif %}
   {% block robots %}{% endblock %}
+  <link rel="preload" href="/static/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/style.css">
   {% block head %}{% endblock %}
 </head>
-<body data-api="{{ api_url }}" data-leads-api="{{ leads_api_url }}" data-billing="{{ billing_mode }}" data-checkout="{{ checkout_url }}" data-free-group-max="{{ free_group_max }}">
+<body data-api="{{ api_url }}" data-leads-api="{{ leads_api_url }}" data-billing="{{ billing_mode }}" data-checkout="{{ checkout_url }}" data-free-group-max="{{ free_group_max }}" data-pro-group-max="{{ pro_group_max }}">
   <header class="top no-print">
-    <a class="brand" href="/">Radar <strong>Minimis</strong></a>
-    <nav>
-      <a href="/minimis/">Calculadora de minimis</a>
-      <a href="/asesorias/">Para asesorías</a>
-      <a href="/ayudas/cierran-pronto/">Cierran pronto</a>
-    </nav>
+    <div class="wrap top-row">
+      <a class="brand" href="/">Radar Minimis</a>
+      <nav aria-label="Principal">
+        <a href="/minimis/">Calculadora</a>
+        <a href="/asesorias/">Asesorías</a>
+        <a href="/ayudas/cierran-pronto/">Cierran pronto</a>
+        <a href="/asesorias/#acceso" class="nav-access">Acceso clientes</a>
+      </nav>
+    </div>
+    <div class="registry">
+      <div class="wrap registry-row">
+        <span>Fuente: BDNS / SNPSAP</span>
+        <span>Datos a <time datetime="{{ updated }}">{{ updated_es }}</time></span>
+        <span class="hide-sm">Reg. (UE) 2023/2831 · 2023/2832 · 1408/2013 · 717/2014</span>
+      </div>
+    </div>
   </header>
-  <main>
+  <main class="wrap">
     {% block content %}{% endblock %}
   </main>
-  <footer class="no-print">
-    <p>{{ attribution }}. Última actualización de los datos: {{ updated }}.</p>
-    <p>{{ disclaimer }} <a href="/aviso-legal/">Aviso legal, privacidad y condiciones</a>.</p>
+  <footer class="site-foot no-print">
+    <div class="wrap foot-grid">
+      <div>
+        <p class="foot-brand">Radar Minimis</p>
+        <p>{{ attribution }}. Última actualización de los datos: <span class="mono">{{ updated_es }}</span>.</p>
+      </div>
+      <div>
+        <p>{{ disclaimer }}</p>
+        <p class="foot-links"><a href="/aviso-legal/">Aviso legal</a><a href="/aviso-legal/#privacidad">Privacidad</a><a href="/condiciones/">Condiciones de contratación</a></p>
+      </div>
+    </div>
   </footer>
   {% if billing_mode == "validation" %}
   <div id="pro-modal" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="pro-modal-title" hidden>
     <div class="modal-box">
-      <button type="button" class="modal-close" data-modal-close aria-label="Cerrar">×</button>
-      <p class="badge minimis">Acceso anticipado</p>
+      <button type="button" class="modal-close" data-modal-close aria-label="Cerrar">Cerrar</button>
+      <p class="kicker">Acceso anticipado</p>
       <h2 id="pro-modal-title">{{ early_title }}</h2>
       <p>{{ early_copy }}</p>
       <form id="pro-form" class="stack" novalidate>
         <label for="pro-email">Email profesional</label>
-        <input id="pro-email" name="email" type="email" required autocomplete="email" maxlength="254" placeholder="nombre@tuasesoria.es">
+        <input id="pro-email" name="email" type="email" required autocomplete="email" maxlength="254" placeholder="nombre@asesoria.es">
         <label for="pro-num">Número aproximado de empresas que gestionas</label>
-        <input id="pro-num" name="num_cifs_estimados" type="number" min="1" max="100000" required inputmode="numeric" placeholder="40">
+        <input id="pro-num" class="mono" name="num_cifs_estimados" type="number" min="1" max="100000" required inputmode="numeric" placeholder="40">
         <div class="hp" aria-hidden="true"><label for="pro-web">No rellenar</label><input id="pro-web" name="web" tabindex="-1" autocomplete="off"></div>
         <label class="check"><input type="checkbox" name="consentimiento" required> Acepto que {{ legal_owner }} guarde mi email solo para avisarme del acceso anticipado (<a href="/aviso-legal/#privacidad">privacidad</a>). Puedo pedir la baja en cualquier momento.</label>
         <input type="hidden" name="origen_clic" value="">
         <input type="hidden" name="cif_consultado" value="">
-        <button>Solicitar acceso anticipado</button>
+        <button class="btn">Solicitar acceso anticipado</button>
         <p class="form-msg" aria-live="polite"></p>
       </form>
       <p class="modal-ok" hidden></p>
+    </div>
+  </div>
+  {% else %}
+  <div id="plan-modal" class="modal no-print" role="dialog" aria-modal="true" aria-labelledby="plan-modal-title" hidden>
+    <div class="modal-box">
+      <button type="button" class="modal-close" data-modal-close aria-label="Cerrar">Cerrar</button>
+      <p class="kicker">Suscripción mensual</p>
+      <h2 id="plan-modal-title">Plan Asesorías Pro</h2>
+      <p class="price"><span class="mono">{{ plan.precio }}</span></p>
+      <table class="kv">
+        <tr><th>Cartera</th><td>Hasta <span class="mono">{{ plan.max_cifs }}</span> CIF de personas jurídicas, guardados en tu cuenta</td></tr>
+        <tr><th>«Única empresa»</th><td>Grupos de hasta <span class="mono">{{ pro_group_max }}</span> CIF (principal y {{ plan.max_vinculadas }} vinculadas)</td></tr>
+        <tr><th>Consultas</th><td>Sin límite diario</td></tr>
+        <tr><th>Revisión</th><td>Margen de toda la cartera contra la BDNS; marca las concesiones registradas desde la revisión anterior</td></tr>
+        <tr><th>Informes</th><td>Informe imprimible por cliente, con referencia de control</td></tr>
+        <tr><th>Baja</th><td>En cualquier momento, desde el portal de cliente de Stripe</td></tr>
+      </table>
+      <button type="button" class="btn btn-block" id="plan-pay">Continuar al pago en Stripe</button>
+      <p class="form-msg" aria-live="polite"></p>
+      <p class="small">Pago procesado por Stripe. Al continuar aceptas las <a href="/condiciones/">condiciones de contratación</a> y la <a href="/aviso-legal/#privacidad">política de privacidad</a>. ¿Ya eres cliente? <a href="/asesorias/#acceso">Introduce tu clave</a>.</p>
     </div>
   </div>
   {% endif %}

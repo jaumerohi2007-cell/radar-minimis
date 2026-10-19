@@ -12,6 +12,7 @@ from pathlib import Path
 from . import ATTRIBUTION, DISCLAIMER, __version__
 from . import leads as L
 from . import minimis as M
+from .billing import PLAN_ASESORIAS
 
 TARGET = Path(__file__).resolve().parent.parent / "cloudflare" / "constants.js"
 
@@ -42,6 +43,7 @@ def render_constants_js() -> str:
         "EARLY_ACCESS_TITLE": L.EARLY_ACCESS_TITLE,
         "EARLY_ACCESS_COPY": L.EARLY_ACCESS_COPY,
         "MAX_NUM_CIFS": L.MAX_NUM_CIFS,
+        "PLAN": PLAN_ASESORIAS,
     }
     lines = [
         "// GENERADO por `uv run python data_engine.py cloudflare-constants` desde radar_minimis (Python).",

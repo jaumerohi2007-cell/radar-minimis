@@ -5,16 +5,20 @@ pages_build_output_dir = "site_dist"
 compatibility_date = "2025-09-01"
 
 [vars]
-BILLING_MODE = "validation"        # "stripe" solo tras el alta fiscal (y con la API Python para las cuentas)
+BILLING_MODE = "stripe"            # "validation" = puerta falsa + lista de espera, sin cobros
 FREE_LOOKUPS_PER_DAY = "10"
 FREE_GROUP_MAX_CIFS = "2"
 TOPE_PESCA_EUR = "40000"           # España: RD 1139/2024 (art. 3.2 bis Reg. 717/2014); 30000 = régimen base
 STRIPE_PAYMENT_LINK = ""
+# Precio recurrente de 19,00 €/mes del producto «Radar Minimis — Plan Asesorías Pro». Es público (no es secreto);
+# vacío = /api/checkout lo busca en la API de Stripe. Comprobación: GET /api/health?stripe=1
+STRIPE_PRICE_ID = ""
 SITE_URL = "https://radar-minimis.pages.dev"
 CONTACT_EMAIL = "jaumeroig.dev@gmail.com"
 RM_LEGAL_OWNER = "Jaume Roig Hidalgo"
 RM_PRIVACY_EMAIL = "jaumeroig.dev@gmail.com"
-# IP_SALT es un secreto: npx wrangler@4 pages secret put IP_SALT --project-name radar-minimis
+# Secretos (nunca en este fichero ni en git): npx wrangler@4 pages secret put NOMBRE --project-name radar-minimis
+#   IP_SALT, STRIPE_SECRET_KEY (sk_live_…) y, opcional, STRIPE_WEBHOOK_SECRET (whsec_… de /api/stripe/webhook)
 
 [[d1_databases]]
 binding = "DB"

@@ -21,3 +21,4 @@ export const CONSENTIMIENTO_VERSION = "lista-espera-v1-2026-10-19";
 export const EARLY_ACCESS_TITLE = "Acceso Asesorías Pro";
 export const EARLY_ACCESS_COPY = "Monitoriza hasta 100 CIFs en automático y genera informes de minimis en 1 clic. Estamos activando cuentas por orden de solicitud con un 50% de descuento vitalicio (19 €/mes). Déjanos tu email profesional y el número aproximado de empresas que gestionas.";
 export const MAX_NUM_CIFS = 100000;
+export const PLAN = {"codigo": "pro_100", "nombre": "Radar Minimis — Plan Asesorías Pro", "importe_cent": 1900, "precio": "19,00 €/mes", "max_cifs": 100, "max_vinculadas": 3};

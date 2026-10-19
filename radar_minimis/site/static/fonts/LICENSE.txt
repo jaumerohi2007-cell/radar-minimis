@@ -1,0 +1,5 @@
+Fuentes incluidas (subconjunto latino, WOFF2), todas bajo SIL Open Font License 1.1 (https://openfontlicense.org):
+- Instrument Serif, Copyright 2022 The Instrument Serif Project Authors.
+- Inter, Copyright 2020 The Inter Project Authors.
+- IBM Plex Mono, Copyright 2017 IBM Corp.
+Obtenidas de Fontsource 5.3.0 (@fontsource/instrument-serif, @fontsource-variable/inter, @fontsource/ibm-plex-mono).

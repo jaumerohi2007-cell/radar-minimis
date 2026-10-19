@@ -24,7 +24,7 @@ def test_cloudflare_constants_are_generated_from_python():
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node.js no está instalado")
 def test_node_suite_for_pages_functions():
     proc = subprocess.run(
-        ["node", "--test", "tests/js/core.test.js", "tests/js/functions.test.js"],
+        ["node", "--test", "tests/js/core.test.js", "tests/js/functions.test.js", "tests/js/stripe.test.js"],
         cwd=SRC,
         capture_output=True,
         text=True,
@@ -50,11 +50,13 @@ def test_d1_schema_matches_sqlite_migration():
 def test_wrangler_render_and_docker_configs():
     wrangler = tomllib.loads((SRC / "wrangler.toml").read_text(encoding="utf-8"))
     assert wrangler["pages_build_output_dir"] == "site_dist"
-    assert wrangler["vars"]["BILLING_MODE"] == "validation" and wrangler["vars"]["TOPE_PESCA_EUR"] == "40000"
+    assert wrangler["vars"]["BILLING_MODE"] == "stripe" and wrangler["vars"]["TOPE_PESCA_EUR"] == "40000"
+    assert not any(str(v).startswith(("sk_", "rk_", "whsec_")) for v in wrangler["vars"].values())  # repo público
     assert wrangler["d1_databases"][0]["binding"] == "DB"
     render = (SRC / "render.yaml").read_text(encoding="utf-8")
     assert "plan: free" in render and "healthCheckPath: /api/health" in render and "value: validation" in render
     docker = (SRC / "Dockerfile").read_text(encoding="utf-8")
     assert "uv sync --frozen --no-dev" in docker and "USER app" in docker and "${PORT}" in docker
-    for route in ("functions/api/minimis/[cif].js", "functions/api/waitlist.js", "functions/api/evento.js"):
+    routes = ("minimis/[cif].js", "waitlist.js", "evento.js", "checkout.js", "stripe/activar.js", "stripe/webhook.js")
+    for route in (f"functions/api/{r}" for r in (*routes, "cuenta/index.js", "cuenta/cartera.js", "cuenta/portal.js")):
         assert (SRC / route).is_file(), route

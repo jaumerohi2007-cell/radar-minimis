@@ -5,6 +5,6 @@
   "description": "API de validación a 0 €/mes: Cloudflare Pages Functions + D1",
   "engines": { "node": ">=20" },
   "scripts": {
-    "test": "node --test tests/js/core.test.js tests/js/functions.test.js"
+    "test": "node --test tests/js/core.test.js tests/js/functions.test.js tests/js/stripe.test.js"
   }
 }

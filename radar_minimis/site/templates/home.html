@@ -1,30 +1,83 @@
 {% extends "base.html" %}
-{% block title %}Radar Minimis · Calcula tu margen de minimis y encuentra ayudas abiertas{% endblock %}
+{% block title %}Radar Minimis · Margen de minimis por CIF y convocatorias abiertas de la BDNS{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>¿Cuánto minimis le queda a tu empresa?</h1>
-  <p>Introduce el CIF y en segundos verás las ayudas de minimis registradas en la BDNS en los últimos tres años y el margen disponible por régimen. Gratis.</p>
-  <form action="/minimis/" method="get" class="inline">
-    <label for="cif">CIF</label><input id="cif" name="cif" required pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]" placeholder="B12345674">
-    <button>Calcular margen</button>
+<section class="masthead">
+  <p class="kicker">Ayudas de minimis · Cómputo de tres años, fecha a fecha</p>
+  <h1>Margen de minimis por CIF, calculado sobre la Base de Datos Nacional de Subvenciones.</h1>
+  <p class="lede">Suma de las concesiones de minimis registradas en la BDNS en los tres años anteriores a la fecha de referencia, desglosada por régimen y por «única empresa». Consulta gratuita, sin registro.</p>
+  <form action="/minimis/" method="get" class="query">
+    <label for="cif">CIF</label>
+    <input id="cif" class="mono" name="cif" required pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]" placeholder="B12345674" autocomplete="off" spellcheck="false">
+    <button class="btn">Calcular margen</button>
   </form>
-  <p class="small">¿Llevas una asesoría? <a href="/asesorias/">Mira el panel de cartera</a>: semáforo de margen y alertas de concesiones nuevas para todos tus clientes.</p>
+</section>
+
+<section class="grid grid-4 specs" aria-label="Topes aplicados">
+  {% for r in rules %}
+  <div class="cell">
+    <p class="label">{{ r.nombre.split(" (")[0] }}</p>
+    <p class="figure">{{ r.tope|eur }}</p>
+    <p class="small">{{ r.periodo }} · {{ r.base }}</p>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="grid grid-3 services">
+  <div class="cell">
+    <p class="label">01 · Calculadora</p>
+    <h2>Margen disponible</h2>
+    <p>Concesiones computadas, tope por régimen y margen de la «única empresa» para una fecha prevista de concesión.</p>
+    <a href="/minimis/">Abrir la calculadora</a>
+  </div>
+  <div class="cell">
+    <p class="label">02 · Informe</p>
+    <h2>Informe para expediente</h2>
+    <p>Documento imprimible con referencia de control, hora de consulta a la BDNS, desglose de concesiones y borrador de declaración responsable.</p>
+    <a href="/minimis/">Generar desde la calculadora</a>
+  </div>
+  <div class="cell">
+    <p class="label">03 · Asesorías</p>
+    <h2>Cartera de clientes</h2>
+    <p>Hasta {{ plan.max_cifs }} CIF por cuenta, revisión de toda la cartera y detección de concesiones nuevas. {{ plan.precio }}.</p>
+    <a href="/asesorias/">Ver el panel</a>
+  </div>
 </section>
 
 {% if closing %}
-<h2>Cierran pronto</h2>
-<ul class="cards">
-  {% for c in closing %}<li><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }} · cierra el {{ c.fecha_fin_solicitud|fecha }}</small></li>{% endfor %}
-</ul>
-<p><a href="/ayudas/cierran-pronto/">Ver todas las que cierran pronto</a></p>
+<section class="block">
+  <div class="block-head">
+    <h2>Cierran pronto</h2>
+    <a href="/ayudas/cierran-pronto/">Relación completa</a>
+  </div>
+  <div class="scroll">
+  <table class="ledger">
+    <thead><tr><th>Código BDNS</th><th>Convocatoria</th><th>Cierre</th></tr></thead>
+    <tbody>
+    {% for c in closing %}
+      <tr><td class="mono">{{ c.codigo_bdns }}</td><td><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }}</small></td><td class="mono nowrap">{{ c.fecha_fin_solicitud|fecha }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
 {% endif %}
 
-<h2>Últimas convocatorias registradas</h2>
-<ul class="cards">
-  {% for c in latest %}<li><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }} · {{ c.presupuesto_total|eur }}</small></li>{% endfor %}
-</ul>
+<section class="block">
+  <div class="block-head"><h2>Últimas convocatorias registradas</h2><span class="small mono">{{ total }} publicadas</span></div>
+  <div class="scroll">
+  <table class="ledger">
+    <thead><tr><th>Código BDNS</th><th>Convocatoria</th><th class="num">Presupuesto</th></tr></thead>
+    <tbody>
+    {% for c in latest %}
+      <tr><td class="mono">{{ c.codigo_bdns }}</td><td><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }}</small></td><td class="num mono">{{ c.presupuesto_total|eur }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
 
-<h2>Explorar por comunidad y beneficiario</h2>
-<ul class="links">{% for h in hubs %}<li><a href="{{ h.path }}">{{ h.title }}</a> ({{ h.items|length }})</li>{% endfor %}</ul>
-<p class="small">{{ total }} convocatorias publicadas en este sitio.</p>
+<section class="block">
+  <div class="block-head"><h2>Índice por comunidad y beneficiario</h2></div>
+  <ul class="index">{% for h in hubs %}<li><a href="{{ h.path }}">{{ h.title }}</a><span class="mono">{{ h.items|length }}</span></li>{% endfor %}</ul>
+</section>
 {% endblock %}

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 
@@ -96,3 +97,21 @@ def test_cli_leads_summary_export_and_erasure(settings, monkeypatch, tmp_path, c
     assert data_engine.main(["leads", "--borrar", "A@X.es"]) == 0
     with Store(settings.db_path) as store:
         assert store.leads() == []
+
+
+def test_d1_accounts_and_key_rotation_use_wrangler_without_external_data():
+    seen = []
+
+    def runner(cmd, **kwargs):
+        seen.append(cmd[-1])
+        results = [{"id": 7}] if "UPDATE" in cmd[-1] else [{"id": 7, "email": "a@b.es", "activa": 1, "cifs": 3}]
+        stdout = json.dumps([{"results": results, "success": True}])
+        return subprocess.CompletedProcess(cmd, 0, stdout=stdout, stderr="")
+
+    assert leads.d1_accounts("db", runner=runner)[0]["cifs"] == 3
+    key = leads.d1_rotate_key("db", 7, runner=runner)
+    assert key.startswith("rm_") and len(key) == 46
+    assert hashlib.sha256(key.encode()).hexdigest() in seen[-1] and key not in seen[-1]
+    for bad in (0, -1, True, "7 OR 1=1"):
+        with pytest.raises(ValueError):
+            leads.d1_rotate_key("db", bad, runner=runner)

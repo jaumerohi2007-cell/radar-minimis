@@ -1,6 +1,9 @@
 // GET /api/minimis/:cif — margen de minimis de la «única empresa». Mismo contrato JSON que la API Python.
+// Con «Authorization: Bearer <clave>» de una licencia activa: sin cupo diario, grupos de hasta 1 + PLAN.max_vinculadas
+// CIF y, si el CIF está en la cartera, se guarda la revisión y se marcan las concesiones nuevas.
 import { BdnsError, minimisByNif } from "../../../cloudflare/bdns.js";
-import { ATTRIBUTION, DISCLAIMER } from "../../../cloudflare/constants.js";
+import { ATTRIBUTION, DISCLAIMER, PLAN } from "../../../cloudflare/constants.js";
+import { accountFrom, recordReview } from "../../../cloudflare/cuentas.js";
 import { INVALID, NATURAL_PERSON, awardFromApi, classifyNif, computeHeadroom, isIsoDate, normalize } from "../../../cloudflare/core.js";
 import { bumpQuota, clientKey, config, incrMetric, json, proRequired, todayMadrid } from "../../../cloudflare/http.js";
 
@@ -18,12 +21,16 @@ export async function onRequestGet({ request, params, env }) {
     if (!nifs.includes(nif)) nifs.push(nif);
   }
   if (!nifs.length) return json({ detail: "(vacío) no es un CIF válido: revisa el dígito de control." }, 422);
-  if (nifs.length > cfg.freeGroupMax) return json({ detail: proRequired(cfg, "grupo_societario") }, 402);
+  const cuenta = await accountFrom(request, env);
+  const pro = Boolean(cuenta?.activa);
+  if (pro && nifs.length > 1 + PLAN.max_vinculadas)
+    return json({ detail: `Máximo ${1 + PLAN.max_vinculadas} CIF por «única empresa» (CIF principal y ${PLAN.max_vinculadas} vinculadas).` }, 422);
+  if (!pro && nifs.length > cfg.freeGroupMax) return json({ detail: proRequired(cfg, "grupo_societario") }, 402);
   const fecha = url.searchParams.get("fecha");
   if (fecha && !isIsoDate(fecha)) return json({ detail: "Fecha no válida (AAAA-MM-DD)." }, 422);
 
   const today = todayMadrid();
-  if (env.DB) {
+  if (env.DB && !pro) {
     const count = await bumpQuota(env.DB, await clientKey(request, cfg.ipSalt, today, "minimis"), today);
     if (count > cfg.freeLookupsPerDay)
       return json({ detail: `Has alcanzado el límite gratuito de ${cfg.freeLookupsPerDay} consultas diarias. Con Asesorías Pro las consultas son ilimitadas.` }, 429);
@@ -46,9 +53,12 @@ export async function onRequestGet({ request, params, env }) {
     for (const a of own) if (a.beneficiary) beneficiarios[a.nif] = a.beneficiary;
   });
   const report = computeHeadroom(awards, fecha || today, nifs, { fishCeiling: cfg.fishCeiling });
-  if (env.DB) await incrMetric(env.DB, today, "calculo_minimis");
+  if (env.DB) await incrMetric(env.DB, today, pro ? "calculo_minimis_pro" : "calculo_minimis");
+  const revision = pro && !fecha ? await recordReview(env.DB, cuenta.id, report) : null;
   return json({
     ...report,
+    ...(revision ? { revision } : {}),
+    plan: pro ? PLAN.codigo : "gratuito",
     fecha_referencia_indicada: Boolean(fecha),
     consultas_bdns: consultas,
     beneficiarios,

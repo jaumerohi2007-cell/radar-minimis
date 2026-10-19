@@ -16,6 +16,7 @@ export function config(env = {}) {
     freeGroupMax: Number(env.FREE_GROUP_MAX_CIFS || 2),
     fishCeiling: Number(env.TOPE_PESCA_EUR || K.RULES.pesca.tope),
     checkout: env.STRIPE_PAYMENT_LINK || "",
+    siteUrl: String(env.SITE_URL || "https://example.com").replace(/\/$/, ""),
     userAgent: `RadarMinimis/${K.VERSION} (+${env.SITE_URL || "https://example.com"}; ${env.CONTACT_EMAIL || "contacto@example.com"})`,
     ipSalt: env.IP_SALT || "radar-minimis",
   };
@@ -24,7 +25,14 @@ export function config(env = {}) {
 export function proRequired(cfg, origen) {
   return cfg.billingMode === "validation"
     ? { codigo: "acceso_anticipado", origen, titulo: K.EARLY_ACCESS_TITLE, mensaje: K.EARLY_ACCESS_COPY }
-    : { codigo: "requiere_plan", origen, checkout_url: cfg.checkout || null, mensaje: "Función del plan Asesorías Pro." };
+    : {
+        codigo: "requiere_plan",
+        origen,
+        titulo: K.PLAN.nombre,
+        mensaje: `Función del plan Asesorías Pro (${K.PLAN.precio}).`,
+        checkout_api: "/api/checkout",
+        checkout_url: cfg.checkout || null,
+      };
 }
 
 /** El «día de la consulta» es el de España aunque el Worker corra en UTC. */

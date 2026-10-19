@@ -56,6 +56,7 @@ class Settings:
     fish_ceiling_eur: float = 40_000.0
     legal_owner: str = "[Titular del sitio: nombre o razón social y NIF]"
     privacy_email: str = ""
+    legal_nif: str = ""
     google_site_verification: str = ""
 
     def __post_init__(self) -> None:
@@ -106,5 +107,6 @@ class Settings:
             fish_ceiling_eur=float(env("RM_TOPE_PESCA_EUR", "40000")),
             legal_owner=env("RM_LEGAL_OWNER", "[Titular del sitio: nombre o razón social y NIF]"),
             privacy_email=env("RM_PRIVACY_EMAIL", contact),
+            legal_nif=env("RM_LEGAL_NIF", "").strip(),
             google_site_verification=env("RM_GOOGLE_SITE_VERIFICATION", "").strip(),
         )

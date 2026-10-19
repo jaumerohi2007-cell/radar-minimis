@@ -14,6 +14,7 @@ SQLite, genera el sitio pSEO estático y sirve la API.
     uv run python data_engine.py reindex                   # re-parsea lo guardado (sin red)
     uv run python data_engine.py leads [--export leads_validacion.json] [--d1 radar-minimis-db] [--borrar EMAIL]
     uv run python data_engine.py serve [--host 127.0.0.1] [--port 8000]
+    uv run python data_engine.py cuentas                  # licencias de pago en D1 (--rotar ID: clave nueva)
     uv run python data_engine.py daily                     # sync + sync-cartera + build-site (cron)
 """
 
@@ -201,6 +202,24 @@ def cmd_leads(args, settings: Settings) -> int:
     return 0
 
 
+def cmd_cuentas(args, settings: Settings) -> int:
+    """Licencias del plan Asesorías Pro en D1 y reemisión manual de la clave de acceso."""
+    try:
+        if args.rotar:
+            key = leadsmod.d1_rotate_key(args.d1, args.rotar)
+            print(f"Clave nueva de la cuenta {args.rotar} (se muestra una sola vez; la anterior ya no vale):\n{key}")
+            return 0
+        rows = leadsmod.d1_accounts(args.d1)
+    except (leadsmod.D1Error, ValueError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 2
+    activas = sum(1 for r in rows if r.get("activa"))
+    print(f"Cuentas en D1:{args.d1}: {len(rows)} ({activas} activas)")
+    for r in rows:
+        print(f"  #{r['id']}  {r['email']}  {r['estado']}  {r['cifs']} CIF  alta {str(r['creada_en'])[:10]}")
+    return 0
+
+
 def cmd_cloudflare_constants(args, settings: Settings) -> int:
     from radar_minimis.cloudflare_export import write_constants
 
@@ -283,6 +302,11 @@ def build_parser() -> argparse.ArgumentParser:
     ld.add_argument("--borrar", metavar="EMAIL", help="borra todos los envíos de ese email (RGPD)")
     ld.add_argument("--dias", type=int, default=30, help="ventana de métricas del embudo")
     ld.set_defaults(func=cmd_leads)
+
+    ct = sub.add_parser("cuentas", help="licencias de pago en Cloudflare D1 y reemisión de claves")
+    ct.add_argument("--d1", metavar="BASE", default="radar-minimis-db", help="base D1 remota (`wrangler login`)")
+    ct.add_argument("--rotar", type=int, metavar="ID", help="emite una clave nueva para la cuenta ID")
+    ct.set_defaults(func=cmd_cuentas)
 
     v = sub.add_parser("serve", help="sirve la API (y el sitio generado) en local")
     v.add_argument("--host", default="127.0.0.1")

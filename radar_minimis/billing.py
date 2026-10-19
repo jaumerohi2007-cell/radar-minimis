@@ -34,6 +34,17 @@ PLANS = {
     "pro_100": Plan("pro_100", 100),
 }
 DEFAULT_PLAN = "asesoria_50"
+
+# Plan que se cobra en producción (Cloudflare + Stripe Checkout). La web, las Functions y el precio de Stripe
+# deben coincidir: `STRIPE_PRICE_ID` apunta a un precio recurrente de PLAN_ASESORIAS["importe_cent"] al mes.
+PLAN_ASESORIAS = {
+    "codigo": "pro_100",
+    "nombre": "Radar Minimis — Plan Asesorías Pro",
+    "importe_cent": 1900,
+    "precio": "19,00 €/mes",
+    "max_cifs": 100,
+    "max_vinculadas": 3,
+}
 # Importe cobrado (céntimos) -> plan: no depende de que el Payment Link propague `metadata`.
 PLAN_BY_AMOUNT = {
     2900: "asesoria_50",

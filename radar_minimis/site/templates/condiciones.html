@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Condiciones de contratación del plan Asesorías Pro | Radar Minimis{% endblock %}
+{% block content %}
+<header class="doc-head">
+  <p class="kicker">Información legal</p>
+  <h1>Condiciones de contratación</h1>
+  <p class="lede">Plan Asesorías Pro · <span class="mono">{{ plan.precio }}</span></p>
+</header>
+<div class="prose">
+<h2>1. Prestador</h2>
+<p>{{ legal_owner }}{% if legal_nif %}, NIF <span class="mono">{{ legal_nif }}</span>{% endif %}. Contacto: <span class="mono">{{ privacy_email }}</span>.</p>
+<h2>2. Objeto</h2>
+<p>Acceso a un panel para guardar una cartera de hasta {{ plan.max_cifs }} CIF de personas jurídicas, calcular su margen de minimis a partir de las concesiones registradas en la BDNS, detectar concesiones nuevas entre revisiones y generar informes imprimibles por cliente. El servicio se dirige a profesionales y empresas.</p>
+<h2>3. Precio y pago</h2>
+<p>{{ plan.precio }}, con cargo recurrente mensual mediante Stripe desde la fecha de contratación. La factura detalla los impuestos aplicables. El pago se procesa en la pasarela de Stripe; el prestador no accede a los datos de la tarjeta.</p>
+<h2>4. Duración y baja</h2>
+<p>La suscripción se renueva cada mes hasta su baja. Puedes darte de baja en cualquier momento desde el portal de cliente (botón «Gestionar suscripción» del panel) o escribiendo a <span class="mono">{{ privacy_email }}</span>. No se cobran periodos posteriores a la baja.</p>
+<h2>5. Acceso</h2>
+<p>Al completar el pago se emite una clave de acceso personal que se muestra una sola vez. Guárdala: el prestador solo conserva su huella criptográfica. Durante las 72 horas siguientes al pago puedes volver a emitirla desde el enlace de confirmación de Stripe; después, escribiendo desde el email de la suscripción.</p>
+<h2>6. Alcance y responsabilidad</h2>
+<p>Los cálculos son orientativos, dependen de los datos publicados en la BDNS y de que se indiquen todas las empresas vinculadas, y no sustituyen la declaración responsable del solicitante ni constituyen asesoramiento jurídico. El servicio depende de la disponibilidad de la API pública de la BDNS. La responsabilidad del prestador se limita al importe pagado en los doce meses anteriores al hecho que la origine, salvo dolo o culpa grave.</p>
+<h2>7. Datos personales</h2>
+<p>Según la <a href="/aviso-legal/#privacidad">política de privacidad</a>.</p>
+<h2>8. Ley aplicable</h2>
+<p>Legislación española.</p>
+</div>
+{% endblock %}

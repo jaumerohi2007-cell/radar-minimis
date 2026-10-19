@@ -7,13 +7,16 @@ métricas son contadores diarios agregados: no se guardan IP ni cookies.
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import re
+import secrets
 import statistics
 import subprocess
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 from .privacy import NifKind, classify, normalize
@@ -170,3 +173,26 @@ def d1_delete_leads(database: str, email: str, *, runner: Runner = subprocess.ru
     if not valid_email(email):  # la expresión excluye comillas: no hay inyección posible en el literal
         raise ValueError("email no válido")
     d1_query(database, f"DELETE FROM leads WHERE email = '{email}'", runner=runner)
+
+
+# --- Licencias del plan Asesorías Pro en D1 (las crea /api/stripe/activar) ------------------------------------
+def d1_accounts(database: str, *, runner: Runner = subprocess.run) -> list[dict]:
+    sql = (
+        "SELECT c.id, c.email, c.plan, c.estado, c.activa, c.creada_en, c.verificada_en, "
+        "(SELECT COUNT(*) FROM cartera p WHERE p.cuenta_id = c.id) AS cifs FROM cuentas c ORDER BY c.id"
+    )
+    return d1_query(database, sql, runner=runner)
+
+
+def d1_rotate_key(database: str, account_id: int, *, runner: Runner = subprocess.run) -> str:
+    """Emite una clave de acceso nueva (la anterior deja de valer) y la devuelve en claro una sola vez."""
+    if isinstance(account_id, bool) or not isinstance(account_id, int) or account_id < 1:
+        raise ValueError("id de cuenta no válido")
+    key = "rm_" + secrets.token_urlsafe(32)
+    digest = hashlib.sha256(key.encode()).hexdigest()
+    now = datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    # Literales generados aquí (hex, ISO, entero): no hay datos externos en la sentencia.
+    sql = f"UPDATE cuentas SET clave_hash = '{digest}', clave_emitida_en = '{now}' WHERE id = {account_id} RETURNING id"
+    if not d1_query(database, sql, runner=runner):
+        raise ValueError(f"no existe la cuenta {account_id}")
+    return key

@@ -2,7 +2,7 @@
 # robots y sitemap apuntando a RM_SITE_URL) y publica sitio + Pages Functions + D1 en Cloudflare Pages.
 # Secrets: CLOUDFLARE_API_TOKEN («Cloudflare Pages: Edit» + «D1: Edit»), CLOUDFLARE_ACCOUNT_ID
 # Variables: CF_PAGES_PROJECT, RM_SITE_URL, RM_CONTACT_EMAIL, RM_LEGAL_OWNER, RM_PRIVACY_EMAIL,
-#            RM_GOOGLE_SITE_VERIFICATION (opcional), BILLING_MODE (opcional, validation por defecto)
+#            RM_LEGAL_NIF, RM_GOOGLE_SITE_VERIFICATION (opcionales), BILLING_MODE (stripe por defecto)
 name: sync-bdns
 
 on:
@@ -19,13 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
-      BILLING_MODE: ${{ vars.BILLING_MODE || 'validation' }}
+      BILLING_MODE: ${{ vars.BILLING_MODE || 'stripe' }}
       RM_SITE_URL: ${{ vars.RM_SITE_URL || 'https://radar-minimis.pages.dev' }}
       RM_API_URL: ""
       RM_ALLOWED_ORIGINS: ${{ vars.RM_SITE_URL || 'https://radar-minimis.pages.dev' }}
       RM_CONTACT_EMAIL: ${{ vars.RM_CONTACT_EMAIL }}
       RM_LEGAL_OWNER: ${{ vars.RM_LEGAL_OWNER }}
       RM_PRIVACY_EMAIL: ${{ vars.RM_PRIVACY_EMAIL }}
+      RM_LEGAL_NIF: ${{ vars.RM_LEGAL_NIF }}
       RM_GOOGLE_SITE_VERIFICATION: ${{ vars.RM_GOOGLE_SITE_VERIFICATION }}
       HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     steps:

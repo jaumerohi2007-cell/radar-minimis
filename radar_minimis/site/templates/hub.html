@@ -2,20 +2,27 @@
 {% block title %}{{ hub.title }}{% endblock %}
 {% block description %}{{ hub.intro }} Plazos, presupuestos y beneficiarios de cada convocatoria.{% endblock %}
 {% block content %}
-<nav class="crumbs"><a href="/">Inicio</a> › {{ hub.title }}</nav>
-<h1>{{ hub.title }}</h1>
-<p>{{ hub.intro }}</p>
-<table class="list">
-  <thead><tr><th>Convocatoria</th><th>Estado</th><th>Cierre</th><th>Presupuesto</th></tr></thead>
+<nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a><span>/</span>{{ hub.title }}</nav>
+<header class="doc-head">
+  <p class="kicker">Índice de convocatorias · <span class="mono">{{ hub.items|length }}</span> registros</p>
+  <h1>{{ hub.title }}</h1>
+  <p class="lede">{{ hub.intro }}</p>
+</header>
+<div class="scroll">
+<table class="ledger">
+  <thead><tr><th>Código BDNS</th><th>Convocatoria</th><th>Estado</th><th>Cierre</th><th class="num">Presupuesto</th></tr></thead>
   <tbody>
   {% for c in hub.items %}
+    {% set e = estados[c.codigo_bdns] %}
     <tr>
-      <td><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><br><small>{{ c.organo_nivel3 or c.organo_nivel2 }}</small></td>
-      <td><span class="badge estado-{{ estados[c.codigo_bdns] }}">{{ estados[c.codigo_bdns]|replace("_", " ") }}</span></td>
-      <td>{{ c.fecha_fin_solicitud|fecha }}</td>
-      <td>{{ c.presupuesto_total|eur }}</td>
+      <td class="mono">{{ c.codigo_bdns }}</td>
+      <td><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }}</small></td>
+      <td><span class="tag tag-{{ e }}">[{{ {"abierta": "Vigente", "cerrada": "Cerrada", "proxima": "Próxima", "sin_plazo": "Sin plazo"}[e] }}]</span></td>
+      <td class="mono nowrap">{{ c.fecha_fin_solicitud|fecha }}</td>
+      <td class="num mono">{{ c.presupuesto_total|eur }}</td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

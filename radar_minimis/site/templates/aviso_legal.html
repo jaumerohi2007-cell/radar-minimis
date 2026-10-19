@@ -1,19 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Aviso legal, privacidad y condiciones | Radar Minimis{% endblock %}
+{% block title %}Aviso legal y privacidad | Radar Minimis{% endblock %}
 {% block content %}
-<h1>Aviso legal, privacidad y condiciones</h1>
+<header class="doc-head">
+  <p class="kicker">Información legal</p>
+  <h1>Aviso legal y privacidad</h1>
+</header>
+<div class="prose">
 <h2>Titular</h2>
-<p>{{ legal_owner }}. Contacto: {{ privacy_email }}.</p>
+<p>{{ legal_owner }}{% if legal_nif %}, NIF <span class="mono">{{ legal_nif }}</span>{% endif %}. Contacto: <span class="mono">{{ privacy_email }}</span>.</p>
 <h2>Origen y reutilización de los datos</h2>
-<p>{{ attribution }}. Los datos se reutilizan conforme a la Ley 37/2007 sobre reutilización de la información del sector público y a las condiciones generales publicadas en el portal del SNPSAP. Se indica la fecha de última actualización ({{ updated }}) y no se alteran los metadatos de origen.</p>
+<p>{{ attribution }}. Los datos se reutilizan conforme a la Ley 37/2007 sobre reutilización de la información del sector público y a las condiciones generales publicadas en el portal del SNPSAP. Se indica la fecha de última actualización (<span class="mono">{{ updated_es }}</span>) y no se alteran los metadatos de origen.</p>
 <p>{{ disclaimer }}</p>
 <h2 id="privacidad">Privacidad</h2>
 <ul>
+  <li><strong>Responsable:</strong> {{ legal_owner }}. Contacto: <span class="mono">{{ privacy_email }}</span>.</li>
   <li><strong>Consultas por CIF:</strong> solo se admiten personas jurídicas. No se muestran ni se reutilizan datos de personas físicas.</li>
-  <li><strong>Lista de acceso anticipado:</strong> si la solicitas, guardamos tu email, el número aproximado de empresas que gestionas, el CIF consultado (si lo había), qué botón usaste y la fecha. La finalidad es avisarte del acceso anticipado. La base jurídica es tu consentimiento, que puedes retirar en cualquier momento. No se ceden a terceros y se borran al terminar la fase de acceso anticipado o cuando lo pidas.</li>
-  <li><strong>Derechos:</strong> acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a {{ privacy_email }}. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</li>
+  <li><strong>Clientes del plan Asesorías Pro:</strong> tratamos el email de la suscripción, los identificadores de cliente y suscripción de Stripe y los CIF de la cartera (solo personas jurídicas), con la finalidad de prestar el servicio contratado. Base jurídica: ejecución del contrato. Los datos de pago y facturación los trata Stripe Payments Europe, Ltd.; no recibimos ni guardamos los datos de la tarjeta. Conservamos los datos mientras dure la suscripción y, después, durante los plazos que exija la normativa mercantil y tributaria.</li>
+  <li><strong>Clave de acceso:</strong> se guarda en el almacenamiento local de tu navegador solo cuando entras al panel, para mantener la sesión; en nuestra base de datos solo consta su huella criptográfica (SHA-256). Puedes borrarla con «Cerrar sesión».</li>
+  <li><strong>Lista de acceso anticipado:</strong> si la solicitaste, guardamos tu email, el número aproximado de empresas que gestionas, el CIF consultado (si lo había), qué botón usaste y la fecha, para avisarte del acceso anticipado. Base jurídica: tu consentimiento, que puedes retirar en cualquier momento. Se borran al terminar esa fase o cuando lo pidas.</li>
   <li><strong>Medición y abuso:</strong> contamos de forma agregada por día cuántas veces se usa cada función. No usamos cookies. Para limitar abusos usamos un identificador cifrado de tu IP con una clave que cambia cada día; no permite recuperar la IP y se descarta al día siguiente.</li>
+  <li><strong>Derechos:</strong> acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a <span class="mono">{{ privacy_email }}</span>. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</li>
 </ul>
 <h2>Alcance de los cálculos</h2>
 <p>El margen de minimis es orientativo. Solo incluye ayudas registradas en la BDNS y depende de que se indiquen todas las empresas vinculadas. El informe no es un certificado oficial, no constituye asesoramiento jurídico y no sustituye la declaración responsable del solicitante.</p>
+<p>Las condiciones del plan de pago están en <a href="/condiciones/">Condiciones de contratación</a>.</p>
+</div>
 {% endblock %}

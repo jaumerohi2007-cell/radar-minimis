@@ -20,6 +20,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .. import ATTRIBUTION, DISCLAIMER, __version__
 from ..bdns.models import Convocatoria
+from ..billing import PLAN_ASESORIAS
 from ..config import Settings
 from ..leads import EARLY_ACCESS_COPY, EARLY_ACCESS_TITLE
 from ..matching import CompanyProfile, match
@@ -201,7 +202,10 @@ class SiteBuilder:
             "pro_slots": s.pro_linked_slots,
             "early_title": EARLY_ACCESS_TITLE,
             "early_copy": EARLY_ACCESS_COPY,
+            "plan": PLAN_ASESORIAS,
+            "pro_group_max": 1 + PLAN_ASESORIAS["max_vinculadas"],
             "legal_owner": s.legal_owner,
+            "legal_nif": s.legal_nif,
             "privacy_email": s.privacy_email or s.contact_email,
             "google_site_verification": s.google_site_verification,
             "attribution": ATTRIBUTION,
@@ -209,6 +213,7 @@ class SiteBuilder:
             "unica_empresa": SINGLE_UNDERTAKING_NOTICE,
             "criterio_acumulacion": CRITERIO_ACUMULACION,
             "updated": updated,
+            "updated_es": format_date(date.fromisoformat(updated)),
             "today": self.today,
             "version": __version__,
         }
@@ -267,6 +272,7 @@ class SiteBuilder:
             latest=convs[:20],
             hubs=[h for h in hubs if h.kind in ("comunidad", "beneficiario")],
             total=len(convs),
+            rules=self._rules_table(),
             conv_path=self.conv_path,
         )
         self._render(tmp, "/minimis/", "minimis.html", lastmod=updated, **base, rules=self._rules_table())
@@ -282,6 +288,7 @@ class SiteBuilder:
             umbral_rojo=int(SEMAFORO_ROJO * 100),
         )
         self._render(tmp, "/aviso-legal/", "aviso_legal.html", lastmod=updated, **base)
+        self._render(tmp, "/condiciones/", "condiciones.html", lastmod=updated, **base)
         self._render(tmp, "/404.html", "404.html", sitemap=False, **base)
 
         shutil.copytree(STATIC, tmp / "static")
@@ -486,7 +493,8 @@ class SiteBuilder:
             if parsed.netloc:
                 origins.append(f"{parsed.scheme}://{parsed.netloc}")
         csp = (
-            "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; "
+            "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; font-src 'self'; "
+            "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; "
             f"connect-src 'self' {' '.join(dict.fromkeys(origins))}"
         ).strip()
         return (
@@ -499,6 +507,10 @@ class SiteBuilder:
             "  X-Robots-Tag: noindex\n"
             "/static/*\n"
             "  Cache-Control: public, max-age=604800\n"
+            "/static/fonts/*\n"
+            "  Cache-Control: public, max-age=31536000, immutable\n"
+            "/asesorias/*\n"
+            "  Referrer-Policy: no-referrer\n"
         )
 
     def _write_sitemaps(self, root: Path, per_file: int = 45_000) -> None:

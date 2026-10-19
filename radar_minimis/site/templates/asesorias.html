@@ -1,25 +1,59 @@
 {% extends "base.html" %}
-{% block title %}Panel de minimis para asesorías: vigila toda tu cartera | Radar Minimis{% endblock %}
-{% block description %}Controla el margen de minimis de todos tus clientes con semáforo, alertas de concesiones nuevas y convocatorias compatibles. Demo con 15 empresas.{% endblock %}
+{% block title %}Panel de minimis para asesorías: cartera de hasta {{ plan.max_cifs }} CIF | Radar Minimis{% endblock %}
+{% block description %}Margen de minimis de toda la cartera de clientes: semáforo por proximidad al tope, concesiones nuevas desde la última revisión e informes imprimibles por cliente. {{ plan.precio }}.{% endblock %}
 {% block content %}
-<section class="hero">
-  <p class="badge minimis">Vista previa · Asesorías Pro</p>
-  <h1>Tu cartera de clientes, con el margen de minimis siempre a la vista</h1>
-  <p>Así se ve el panel con 15 CIF vigilados: semáforo según la proximidad al tope, alerta cuando se registra una concesión nueva y convocatorias abiertas compatibles con cada cliente.</p>
-  <div class="actions">
-    <button type="button" data-pro-origen="cartera_lote">Importar mi propio CSV de CIFs</button>
-    <button type="button" class="secondary" data-pro-origen="alertas_cartera">Activar alertas semanales</button>
-    <button type="button" class="secondary" data-pro-origen="informe_pdf">Generar informes de toda la cartera</button>
+<header class="doc-head">
+  <p class="kicker">Plan Asesorías Pro · <span class="mono">{{ plan.precio }}</span></p>
+  <h1>Margen de minimis de toda la cartera de clientes.</h1>
+  <p class="lede">Hasta {{ plan.max_cifs }} CIF por cuenta. Cada revisión recalcula el margen de cada cliente contra la BDNS y marca las concesiones registradas desde la revisión anterior.</p>
+</header>
+
+<section id="acceso" class="grid grid-2 access" aria-live="polite">
+  <div class="cell" id="acceso-estado">
+    <p class="label">Contratación</p>
+    <table class="kv">
+      <tr><th>Precio</th><td class="mono">{{ plan.precio }}</td></tr>
+      <tr><th>Cartera</th><td>Hasta <span class="mono">{{ plan.max_cifs }}</span> CIF de personas jurídicas</td></tr>
+      <tr><th>«Única empresa»</th><td>Hasta <span class="mono">{{ pro_group_max }}</span> CIF por cliente</td></tr>
+      <tr><th>Importación</th><td>CSV con columnas <span class="mono">cif;nombre;vinculadas</span></td></tr>
+      <tr><th>Baja</th><td>En cualquier momento, desde el portal de cliente</td></tr>
+    </table>
+    <div class="actions">
+      <button type="button" class="btn" data-pro-origen="cartera_lote">{% if billing_mode == "stripe" %}Contratar · {{ plan.precio }}{% else %}Solicitar acceso anticipado{% endif %}</button>
+    </div>
   </div>
+  <form class="cell stack" id="acceso-form">
+    <p class="label">Acceso de clientes</p>
+    <label for="acceso-clave">Clave de acceso</label>
+    <input id="acceso-clave" class="mono" name="clave" required autocomplete="current-password" spellcheck="false" placeholder="rm_…">
+    <button class="btn btn-ghost">Entrar al panel</button>
+    <p class="form-msg" aria-live="polite"></p>
+    <p class="small">La clave se emite al completar el pago y se guarda solo en este navegador. Si la pierdes, escribe a <span class="mono">{{ privacy_email }}</span> desde el email de la suscripción.</p>
+  </form>
 </section>
-<p class="small"><strong>Datos de demostración:</strong> las empresas y los CIF son ficticios. Las convocatorias son reales y abiertas a {{ today|fecha }}, y se han cruzado con el motor de encaje real. Los márgenes se calculan con el mismo motor que la calculadora.</p>
-<ul class="legend">
-  <li><span class="sem sem-verde"></span> Margen holgado (&lt; {{ umbral_ambar }} % del tope más exigente)</li>
-  <li><span class="sem sem-ambar"></span> Vigilar ({{ umbral_ambar }}–{{ umbral_rojo }} %)</li>
-  <li><span class="sem sem-rojo"></span> Cerca o por encima del tope (≥ {{ umbral_rojo }} %)</li>
-</ul>
-<div id="panel-resumen" class="cards-3" aria-live="polite"></div>
-<div id="panel"></div>
-<script type="application/json" id="demo-data">{{ demo_json|safe }}</script>
+
+<section id="cliente" class="block" hidden></section>
+
+<section id="demo" class="block">
+  <div class="block-head">
+    <h2>Vista de demostración</h2>
+    <span class="tag">[Datos ficticios]</span>
+  </div>
+  <p class="small">Empresas y CIF ficticios. Las convocatorias son reales, abiertas a <span class="mono">{{ today|fecha }}</span>, y se han cruzado con el motor de encaje. Los márgenes se calculan con el mismo motor que la calculadora.</p>
+  <div class="actions">
+    <button type="button" class="btn btn-ghost" data-pro-origen="cartera_lote">Importar CSV de CIFs</button>
+    <button type="button" class="btn btn-ghost" data-pro-origen="alertas_cartera">Activar vigilancia de la cartera</button>
+    <button type="button" class="btn btn-ghost" data-pro-origen="informe_pdf">Informes de toda la cartera</button>
+  </div>
+  <ul class="legend">
+    <li><span class="dot dot-verde"></span>[Margen disponible] menos del {{ umbral_ambar }} % del tope más exigente</li>
+    <li><span class="dot dot-ambar"></span>[Vigilar] {{ umbral_ambar }}–{{ umbral_rojo }} %</li>
+    <li><span class="dot dot-rojo"></span>[Al límite] {{ umbral_rojo }} % o más</li>
+  </ul>
+  <div id="panel-resumen" class="grid grid-4 summary" aria-live="polite"></div>
+  <div id="panel"></div>
+  <script type="application/json" id="demo-data">{{ demo_json|safe }}</script>
+</section>
+<template id="panel-meta" data-max-cifs="{{ plan.max_cifs }}" data-max-vinculadas="{{ plan.max_vinculadas }}" data-ambar="{{ umbral_ambar }}" data-rojo="{{ umbral_rojo }}"></template>
 {% endblock %}
 {% block scripts %}<script src="/static/asesorias.js" defer></script>{% endblock %}
