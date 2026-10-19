@@ -375,6 +375,10 @@ class Store:
             self.conn.execute("INSERT OR IGNORE INTO processed_events VALUES (?, ?)", (event_id, _now()))
 
     # --- operación ------------------------------------------------------------------------------
+    def first_sync_desde(self, stream: str) -> date | None:
+        row = self.conn.execute("SELECT MIN(desde) AS d FROM sync_runs WHERE stream = ?", (stream,)).fetchone()
+        return date.fromisoformat(row["d"]) if row and row["d"] else None
+
     def record_sync(
         self, stream: str, desde: date | None, hasta: date | None, vistas: int, nuevas: int, errores: int
     ) -> None:

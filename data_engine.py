@@ -38,7 +38,7 @@ from radar_minimis.privacy import NifKind, classify, normalize
 from radar_minimis.site import SiteBuilder
 from radar_minimis.site.builder import format_eur
 from radar_minimis.store import Store
-from radar_minimis.sync import lookup_minimis, sync_convocatorias, sync_portfolio_awards
+from radar_minimis.sync import lookup_minimis, sync_convocatorias, sync_portfolio_awards, sync_range
 
 log = logging.getLogger("data_engine")
 
@@ -59,14 +59,14 @@ def _date(value: str) -> date:
 def cmd_sync(args, settings: Settings) -> int:
     today = today_madrid()
     with Store(settings.db_path) as store, _client(settings) as client:
-        empty = store.stats()["convocatorias"] == 0
         if args.desde:
             desde, hasta = args.desde, args.hasta or today
+        elif args.days:
+            desde, hasta = today - timedelta(days=args.days - 1), today
         else:
-            days = args.days or (args.backfill_days if empty else 3)
-            desde, hasta = today - timedelta(days=days - 1), today
-        if empty and not args.desde:
-            log.info("Base vacía: carga inicial de %d días", (hasta - desde).days + 1)
+            desde, hasta = sync_range(store, today, backfill_days=args.backfill_days)
+            if (hasta - desde).days + 1 > 3:
+                log.info("Carga inicial o pendientes: %s..%s (%d días)", desde, hasta, (hasta - desde).days + 1)
         report = sync_convocatorias(
             client,
             store,
@@ -244,7 +244,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="command", required=True)
 
     s = sub.add_parser("sync", help="sincroniza convocatorias desde la BDNS")
-    s.add_argument("--days", type=int, help="últimos N días (por defecto 3, o --backfill-days si la base está vacía)")
+    s.add_argument("--days", type=int, help="últimos N días (por defecto 3, ampliado hasta cubrir lo pendiente)")
     s.add_argument("--desde", type=_date)
     s.add_argument("--hasta", type=_date)
     s.add_argument("--backfill-days", type=int, default=30)

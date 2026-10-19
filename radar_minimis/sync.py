@@ -15,6 +15,10 @@ from .store import Store
 
 log = logging.getLogger(__name__)
 
+# Inicio del rango con convocatorias sin descargar: fecha ISO, "" si no queda nada o ausente en bases
+# anteriores a este control (se tratan como carga inicial incompleta).
+BACKLOG_KEY = "convocatorias_pendientes_desde"
+
 
 class BDNSSource(Protocol):
     def search_convocatorias(self, desde: date, hasta: date) -> Iterable[dict]: ...
@@ -51,6 +55,30 @@ def date_windows(desde: date, hasta: date, days: int) -> list[tuple[date, date]]
     return windows
 
 
+def sync_range(store: Store, today: date, *, incremental_days: int = 3, backfill_days: int = 30) -> tuple[date, date]:
+    """Rango por defecto: carga inicial, reanudación de lo pendiente o incremental de `incremental_days`."""
+    incremental = today - timedelta(days=incremental_days - 1)
+    backfill = today - timedelta(days=backfill_days - 1)
+    if store.stats()["convocatorias"] == 0:
+        return backfill, today
+    backlog = store.get_meta(BACKLOG_KEY)
+    if backlog is None:  # base previa al control: repasa también el primer barrido completo
+        first = store.first_sync_desde("convocatorias")
+        return min(first, backfill) if first else backfill, today
+    if backlog:
+        return min(date.fromisoformat(backlog), incremental), today
+    return incremental, today
+
+
+def _record_backlog(store: Store, desde: date, pendientes: int) -> None:
+    backlog = store.get_meta(BACKLOG_KEY)
+    if pendientes:
+        start = min(desde, date.fromisoformat(backlog)) if backlog else desde
+        store.set_meta(BACKLOG_KEY, start.isoformat())
+    elif backlog is None or (backlog and desde <= date.fromisoformat(backlog)):
+        store.set_meta(BACKLOG_KEY, "")
+
+
 def sync_convocatorias(
     source: BDNSSource,
     store: Store,
@@ -63,8 +91,9 @@ def sync_convocatorias(
 ) -> SyncReport:
     """Descarga el detalle de las convocatorias nuevas (y refresca las recientes) entre dos fechas.
 
-    `max_details` acota el trabajo por ejecución; lo no procesado queda como `pendientes`
-    y la siguiente ejecución lo recoge, porque solo se descargan códigos desconocidos.
+    `max_details` acota el trabajo por ejecución; lo no procesado queda como `pendientes`, se anota
+    en `BACKLOG_KEY` y `sync_range` amplía la siguiente ejecución hasta cubrirlo (solo se descargan
+    códigos desconocidos, así que reanudar no repite trabajo).
     """
     report = SyncReport(desde, hasta)
     refresh = set(store.codigos_received_since(refresh_since)) if refresh_since else set()
@@ -102,6 +131,7 @@ def sync_convocatorias(
                 budget -= 1
         log.info("Ventana %s..%s: %d convocatorias", w_start, w_end, len(codigos))
     store.record_sync("convocatorias", desde, hasta, report.vistas, report.nuevas, report.errores)
+    _record_backlog(store, desde, report.pendientes)
     return report
 
 
