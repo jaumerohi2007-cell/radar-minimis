@@ -12,7 +12,7 @@ TOPE_PESCA_EUR = "40000"           # España: RD 1139/2024 (art. 3.2 bis Reg. 71
 STRIPE_PAYMENT_LINK = ""
 # Precio recurrente de 19,00 €/mes del producto «Radar Minimis — Plan Asesorías Pro». Es público (no es secreto);
 # vacío = /api/checkout lo busca en la API de Stripe. Comprobación: GET /api/health?stripe=1
-STRIPE_PRICE_ID = ""
+STRIPE_PRICE_ID = "price_1USNJRGxaaygDowpOu5n6Q86"
 SITE_URL = "https://radar-minimis.pages.dev"
 CONTACT_EMAIL = "jaumeroig.dev@gmail.com"
 RM_LEGAL_OWNER = "Jaume Roig Hidalgo"

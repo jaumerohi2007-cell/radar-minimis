@@ -43,7 +43,8 @@ export async function stripe(env, method, path, params) {
   return data;
 }
 
-export const stripeMode = (env) => (String(env.STRIPE_SECRET_KEY || "").startsWith("sk_live_") ? "live" : env.STRIPE_SECRET_KEY ? "test" : null);
+export const stripeMode = (env) =>
+  /^(sk|rk)_live_/.test(String(env.STRIPE_SECRET_KEY || "")) ? "live" : env.STRIPE_SECRET_KEY ? "test" : null;
 
 let cachedPrice = null;
 export const resetPriceCache = () => {
