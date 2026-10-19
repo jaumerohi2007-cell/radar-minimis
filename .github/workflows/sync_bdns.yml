@@ -2,7 +2,7 @@
 # robots y sitemap apuntando a RM_SITE_URL) y publica sitio + Pages Functions + D1 en Cloudflare Pages.
 # Secrets: CLOUDFLARE_API_TOKEN («Cloudflare Pages: Edit» + «D1: Edit»), CLOUDFLARE_ACCOUNT_ID
 # Variables: CF_PAGES_PROJECT, RM_SITE_URL, RM_CONTACT_EMAIL, RM_LEGAL_OWNER, RM_PRIVACY_EMAIL,
-#            RM_LEGAL_NIF, RM_GOOGLE_SITE_VERIFICATION (opcionales), BILLING_MODE (stripe por defecto)
+#            RM_LEGAL_NIF, RM_GOOGLE_SITE_VERIFICATION, RM_INDEXNOW_KEY (opcionales), BILLING_MODE (stripe por defecto)
 name: sync-bdns
 
 on:
@@ -27,6 +27,7 @@ jobs:
       RM_LEGAL_OWNER: ${{ vars.RM_LEGAL_OWNER }}
       RM_PRIVACY_EMAIL: ${{ vars.RM_PRIVACY_EMAIL }}
       RM_LEGAL_NIF: ${{ vars.RM_LEGAL_NIF }}
+      RM_INDEXNOW_KEY: ${{ vars.RM_INDEXNOW_KEY }}
       RM_GOOGLE_SITE_VERIFICATION: ${{ vars.RM_GOOGLE_SITE_VERIFICATION }}
       HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     steps:
@@ -68,6 +69,18 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Después de publicar: los buscadores comprueban la clave en /{RM_INDEXNOW_KEY}.txt del sitio ya desplegado.
+      - name: Avisar a Bing de las URL nuevas (IndexNow)
+        if: env.HAS_CF_TOKEN == 'true' && env.RM_INDEXNOW_KEY != ''
+        run: uv run --frozen python data_engine.py indexnow
+
+      - name: Guardar base de datos tras IndexNow
+        if: env.HAS_CF_TOKEN == 'true' && env.RM_INDEXNOW_KEY != ''
+        uses: actions/cache/save@v4
+        with:
+          path: data/radar.db
+          key: radar-db-${{ github.run_id }}-indexnow
 
       - name: Aviso si falta el token
         if: env.HAS_CF_TOKEN != 'true'

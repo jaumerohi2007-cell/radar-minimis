@@ -92,7 +92,11 @@ export async function createCheckoutSession(env, { siteUrl, origen, cif }) {
     billing_address_collection: "required",
     tax_id_collection: { enabled: "true" },
     metadata: { origen, plan: PLAN.codigo, ...(cif ? { cif } : {}) },
-    subscription_data: { metadata: { origen, plan: PLAN.codigo } },
+    payment_method_collection: "always",
+    subscription_data: {
+      metadata: { origen, plan: PLAN.codigo },
+      ...(PLAN.dias_prueba ? { trial_period_days: PLAN.dias_prueba, trial_settings: { end_behavior: { missing_payment_method: "cancel" } } } : {}),
+    },
   });
 }
 

@@ -1,6 +1,7 @@
 import json
 from dataclasses import replace
 
+import pytest
 from conftest import REF, conv_raw
 
 from radar_minimis.bdns.models import Convocatoria
@@ -185,3 +186,56 @@ def test_contract_terms_page(settings, store):
         assert text in page, text
     legal = (settings.site_dir / "aviso-legal" / "index.html").read_text(encoding="utf-8")
     assert "Stripe Payments Europe" in legal and "SHA-256" in legal
+
+
+def test_guides_are_published_linked_and_in_sitemap(settings, store):
+    from radar_minimis.site.guides import GUIDES
+
+    SiteBuilder(settings, store, today=REF).build()
+    root = settings.site_dir
+    sitemap = (root / "sitemap-1.xml").read_text(encoding="utf-8")
+    home = (root / "index.html").read_text(encoding="utf-8")
+    assert len(GUIDES) >= 6 and (root / "guias" / "index.html").is_file()
+    for g in GUIDES:
+        page = (root / g.path.strip("/") / "index.html").read_text(encoding="utf-8")
+        assert f"<h1>{g.h1}</h1>" in page
+        assert '"@type": "Article"' in page and 'href="/minimis/"' in page
+        assert f"https://radar.test{g.path}" in sitemap and f'href="{g.path}"' in home
+    faq = (root / "guias" / "superar-tope-minimis" / "index.html").read_text(encoding="utf-8")
+    assert '"@type": "FAQPage"' in faq
+
+
+def test_trial_and_report_credit(settings, stripe_settings, store):
+    SiteBuilder(stripe_settings, store, today=REF).build()
+    root = stripe_settings.site_dir
+    assert "Empezar la prueba de 14 días" in (root / "index.html").read_text(encoding="utf-8")
+    assert "Probar 14 días gratis" in (root / "asesorias" / "index.html").read_text(encoding="utf-8")
+    assert "prueba gratuita" in (root / "condiciones" / "index.html").read_text(encoding="utf-8")
+    informe = (root / "minimis" / "informe" / "index.html").read_text(encoding="utf-8")
+    assert 'data-site="https://radar.test"' in informe
+    assert "Calculado con Radar Minimis" in (root / "static" / "informe.js").read_text(encoding="utf-8")
+
+
+def test_indexnow_key_file_and_submission(settings, store, tmp_path):
+    import httpx
+
+    from radar_minimis import indexnow
+
+    prod = replace(settings, indexnow_key="abcdef0123456789")
+    SiteBuilder(prod, store, today=REF).build()
+    assert (prod.site_dir / "abcdef0123456789.txt").read_text(encoding="utf-8") == "abcdef0123456789"
+    urls = indexnow.sitemap_urls(prod.site_dir)
+    assert "https://radar.test/minimis/" in urls
+    assert indexnow.sitemap_urls(prod.site_dir, REF.replace(year=2030)) == []
+    seen = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(json.loads(request.content))
+        return httpx.Response(202)
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        sent = indexnow.submit(urls, key=prod.indexnow_key, site_url="https://radar.test", client=client)
+    assert sent == len(urls) and seen[0]["host"] == "radar.test"
+    assert seen[0]["keyLocation"] == "https://radar.test/abcdef0123456789.txt"
+    with pytest.raises(ValueError):
+        indexnow.submit(urls, key="mala clave", site_url="https://radar.test", client=client)

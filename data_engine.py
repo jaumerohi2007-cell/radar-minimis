@@ -15,6 +15,7 @@ SQLite, genera el sitio pSEO estático y sirve la API.
     uv run python data_engine.py leads [--export leads_validacion.json] [--d1 radar-minimis-db] [--borrar EMAIL]
     uv run python data_engine.py serve [--host 127.0.0.1] [--port 8000]
     uv run python data_engine.py cuentas                  # licencias de pago en D1 (--rotar ID: clave nueva)
+    uv run python data_engine.py indexnow                 # avisa a Bing de las URL nuevas (RM_INDEXNOW_KEY)
     uv run python data_engine.py daily                     # sync + sync-cartera + build-site (cron)
 """
 
@@ -220,6 +221,34 @@ def cmd_cuentas(args, settings: Settings) -> int:
     return 0
 
 
+def cmd_indexnow(args, settings: Settings) -> int:
+    """Envía a IndexNow las URL del sitemap modificadas desde el último envío (todas la primera vez)."""
+    import httpx
+
+    from radar_minimis import indexnow
+
+    if not settings.indexnow_key:
+        print("IndexNow: sin RM_INDEXNOW_KEY, no se envía nada")
+        return 0
+    today = today_madrid()
+    with Store(settings.db_path) as store:
+        last = store.get_meta(indexnow.META_KEY)
+        since = None if args.todas or not last else date.fromisoformat(last)
+        urls = indexnow.sitemap_urls(settings.site_dir, since)
+        if not urls:
+            print("IndexNow: nada nuevo que enviar")
+            return 0
+        try:
+            with httpx.Client(headers={"User-Agent": settings.user_agent}) as client:
+                sent = indexnow.submit(urls, key=settings.indexnow_key, site_url=settings.site_url, client=client)
+        except (httpx.HTTPError, ValueError) as exc:
+            print(f"IndexNow: error {exc}", file=sys.stderr)
+            return 0  # avisar a los buscadores nunca debe tumbar la tarea diaria
+        store.set_meta(indexnow.META_KEY, today.isoformat())
+    print(f"IndexNow: {sent} URL enviadas{' (primer envío completo)' if since is None else f' desde {since}'}")
+    return 0
+
+
 def cmd_cloudflare_constants(args, settings: Settings) -> int:
     from radar_minimis.cloudflare_export import write_constants
 
@@ -307,6 +336,10 @@ def build_parser() -> argparse.ArgumentParser:
     ct.add_argument("--d1", metavar="BASE", default="radar-minimis-db", help="base D1 remota (`wrangler login`)")
     ct.add_argument("--rotar", type=int, metavar="ID", help="emite una clave nueva para la cuenta ID")
     ct.set_defaults(func=cmd_cuentas)
+
+    ix = sub.add_parser("indexnow", help="avisa a Bing/IndexNow de las URL nuevas del sitemap")
+    ix.add_argument("--todas", action="store_true", help="envía todo el sitemap aunque ya se hubiera enviado")
+    ix.set_defaults(func=cmd_indexnow)
 
     v = sub.add_parser("serve", help="sirve la API (y el sitio generado) en local")
     v.add_argument("--host", default="127.0.0.1")

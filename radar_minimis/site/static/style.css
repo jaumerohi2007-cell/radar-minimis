@@ -266,3 +266,13 @@ ul.warnings li { margin-bottom: 4px; }
   .inf thead th, .inf-kv th { background: #F2F2F2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .inf th, .inf td { border-color: #9A9A9A; }
 }
+
+/* --- Guías --- */
+.guide-grid { margin-top: 0; }
+.guide-grid .prose h2:first-child { margin-top: 0; }
+.guide-grid .prose ol, .guide-grid .prose ul { padding-left: 20px; }
+.guide-more { margin-top: 28px; }
+.guide-list li { padding: 8px 0; border-top: 1px solid var(--rule); font-size: .88rem; }
+.inf-credit { margin-top: 8px !important; padding-top: 6px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: .68rem; letter-spacing: .02em; color: var(--ink); }
+.prose table.kv { margin: 12px 0 20px; }
+.guide-grid + .small { margin-top: 12px; }

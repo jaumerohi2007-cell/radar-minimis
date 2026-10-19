@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ guide.title }} | Radar Minimis{% endblock %}
+{% block description %}{{ guide.description }}{% endblock %}
+{% block head %}<script type="application/ld+json">{{ jsonld|safe }}</script>{% endblock %}
+{% block content %}
+<nav class="crumbs" aria-label="Ruta"><a href="/">Inicio</a><span>/</span><a href="/guias/">Guías</a><span>/</span>{{ guide.h1 }}</nav>
+<article>
+  <header class="doc-head">
+    <p class="kicker">Guía · Ayudas de minimis · Revisada <span class="mono">{{ updated_es }}</span></p>
+    <h1>{{ guide.h1 }}</h1>
+    <p class="lede">{{ guide.lede }}</p>
+  </header>
+  <div class="grid grid-calc guide-grid">
+    <div class="cell prose">
+      {{ guide.body|safe }}
+      {% if guide.faq %}
+      <h2>Preguntas frecuentes</h2>
+      <dl class="faq">{% for q, a in guide.faq %}<dt>{{ q }}</dt><dd>{{ a }}</dd>{% endfor %}</dl>
+      {% endif %}
+    </div>
+    <aside class="cell">
+      <p class="label">Calculadora</p>
+      <p>Margen de minimis disponible por CIF, con las concesiones registradas en la BDNS.</p>
+      <form action="/minimis/" method="get" class="stack">
+        <label for="cif">CIF</label>
+        <input id="cif" class="mono" name="cif" required pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]" placeholder="B12345674" autocomplete="off" spellcheck="false">
+        <button class="btn">Calcular margen</button>
+      </form>
+      <p class="label guide-more">Otras guías</p>
+      <ul class="plain guide-list">{% for g in guides if g.slug != guide.slug %}<li><a href="{{ g.path }}">{{ g.h1 }}</a></li>{% endfor %}</ul>
+    </aside>
+  </div>
+  <p class="small">{{ disclaimer }} Esta guía es informativa y no constituye asesoramiento jurídico.</p>
+</article>
+{% endblock %}

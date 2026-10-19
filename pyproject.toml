@@ -37,3 +37,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 [tool.ruff.lint.flake8-bugbear]
 # Patrón idiomático de FastAPI: las dependencias se declaran como valores por defecto.
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header", "fastapi.Body"]
+
+[tool.ruff.lint.per-file-ignores]
+# Contenido editorial en HTML: los párrafos no se parten por longitud de línea.
+"radar_minimis/site/guides.py" = ["E501"]

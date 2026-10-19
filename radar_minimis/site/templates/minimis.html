@@ -55,5 +55,9 @@
   <p class="notice">{{ unica_empresa }}</p>
   <p class="small">{{ criterio_acumulacion }}</p>
 </section>
+<section class="block">
+  <div class="block-head"><h2>Guías</h2></div>
+  <ul class="index">{% for g in guides %}<li><a href="{{ g.path }}">{{ g.h1 }}</a></li>{% endfor %}</ul>
+</section>
 {% endblock %}
 {% block scripts %}<script src="/static/minimis.js" defer></script>{% endblock %}

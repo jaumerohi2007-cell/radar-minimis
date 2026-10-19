@@ -37,6 +37,7 @@ from ..minimis import (
 )
 from ..privacy import cif_with_control
 from ..store import Store
+from .guides import GUIDES, Guide
 
 TEMPLATES = Path(__file__).parent / "templates"
 STATIC = Path(__file__).parent / "static"
@@ -216,6 +217,7 @@ class SiteBuilder:
             "updated_es": format_date(date.fromisoformat(updated)),
             "today": self.today,
             "version": __version__,
+            "guides": GUIDES,
         }
 
         for conv, upd in items:
@@ -289,6 +291,13 @@ class SiteBuilder:
         )
         self._render(tmp, "/aviso-legal/", "aviso_legal.html", lastmod=updated, **base)
         self._render(tmp, "/condiciones/", "condiciones.html", lastmod=updated, **base)
+        self._render(tmp, "/guias/", "guias.html", lastmod=updated, **base)
+        for guide in GUIDES:
+            self._render(
+                tmp, guide.path, "guia.html", lastmod=updated, **base, guide=guide, jsonld=self._guide_jsonld(guide)
+            )
+        if s.indexnow_key:
+            self._write_text(tmp / f"{s.indexnow_key}.txt", s.indexnow_key)
         self._render(tmp, "/404.html", "404.html", sitemap=False, **base)
 
         shutil.copytree(STATIC, tmp / "static")
@@ -484,6 +493,32 @@ class SiteBuilder:
         }
         if conv.presupuesto_total:
             data["amount"] = {"@type": "MonetaryAmount", "currency": "EUR", "value": conv.presupuesto_total}
+        return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+
+    def _guide_jsonld(self, guide: Guide) -> str:
+        data: list[dict] = [
+            {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": guide.h1,
+                "description": guide.description,
+                "url": self.url(guide.path),
+                "dateModified": self.today.isoformat(),
+                "inLanguage": "es",
+                "publisher": {"@type": "Organization", "name": "Radar Minimis", "url": self.url("/")},
+            }
+        ]
+        if guide.faq:
+            data.append(
+                {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                        {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                        for q, a in guide.faq
+                    ],
+                }
+            )
         return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
     def _headers(self) -> str:

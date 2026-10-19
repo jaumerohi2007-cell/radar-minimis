@@ -44,6 +44,7 @@ PLAN_ASESORIAS = {
     "precio": "19,00 €/mes",
     "max_cifs": 100,
     "max_vinculadas": 3,
+    "dias_prueba": 14,  # prueba gratuita en Checkout (con tarjeta; sin cargo hasta el día 15)
 }
 # Importe cobrado (céntimos) -> plan: no depende de que el Payment Link propague `metadata`.
 PLAN_BY_AMOUNT = {

@@ -57,6 +57,7 @@ class Settings:
     legal_owner: str = "[Titular del sitio: nombre o razón social y NIF]"
     privacy_email: str = ""
     legal_nif: str = ""
+    indexnow_key: str = ""
     google_site_verification: str = ""
 
     def __post_init__(self) -> None:
@@ -108,5 +109,6 @@ class Settings:
             legal_owner=env("RM_LEGAL_OWNER", "[Titular del sitio: nombre o razón social y NIF]"),
             privacy_email=env("RM_PRIVACY_EMAIL", contact),
             legal_nif=env("RM_LEGAL_NIF", "").strip(),
+            indexnow_key=env("RM_INDEXNOW_KEY", "").strip(),
             google_site_verification=env("RM_GOOGLE_SITE_VERIFICATION", "").strip(),
         )

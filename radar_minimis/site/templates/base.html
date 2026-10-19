@@ -24,6 +24,7 @@
       <nav aria-label="Principal">
         <a href="/minimis/">Calculadora</a>
         <a href="/asesorias/">Asesorías</a>
+        <a href="/guias/">Guías</a>
         <a href="/ayudas/cierran-pronto/">Cierran pronto</a>
         <a href="/asesorias/#acceso" class="nav-access">Acceso clientes</a>
       </nav>
@@ -47,7 +48,7 @@
       </div>
       <div>
         <p>{{ disclaimer }}</p>
-        <p class="foot-links"><a href="/aviso-legal/">Aviso legal</a><a href="/aviso-legal/#privacidad">Privacidad</a><a href="/condiciones/">Condiciones de contratación</a></p>
+        <p class="foot-links"><a href="/guias/">Guías de minimis</a><a href="/aviso-legal/">Aviso legal</a><a href="/aviso-legal/#privacidad">Privacidad</a><a href="/condiciones/">Condiciones de contratación</a></p>
       </div>
     </div>
   </footer>
@@ -80,6 +81,7 @@
       <p class="kicker">Suscripción mensual</p>
       <h2 id="plan-modal-title">Plan Asesorías Pro</h2>
       <p class="price"><span class="mono">{{ plan.precio }}</span></p>
+      <p class="small">Prueba gratuita de <span class="mono">{{ plan.dias_prueba }}</span> días. Stripe pide la tarjeta, pero no hay cargo hasta el día <span class="mono">{{ plan.dias_prueba + 1 }}</span>; si te das de baja antes, no se cobra nada.</p>
       <table class="kv">
         <tr><th>Cartera</th><td>Hasta <span class="mono">{{ plan.max_cifs }}</span> CIF de personas jurídicas, guardados en tu cuenta</td></tr>
         <tr><th>«Única empresa»</th><td>Grupos de hasta <span class="mono">{{ pro_group_max }}</span> CIF (principal y {{ plan.max_vinculadas }} vinculadas)</td></tr>
@@ -88,7 +90,7 @@
         <tr><th>Informes</th><td>Informe imprimible por cliente, con referencia de control</td></tr>
         <tr><th>Baja</th><td>En cualquier momento, desde el portal de cliente de Stripe</td></tr>
       </table>
-      <button type="button" class="btn btn-block" id="plan-pay">Continuar al pago en Stripe</button>
+      <button type="button" class="btn btn-block" id="plan-pay">Empezar la prueba de {{ plan.dias_prueba }} días</button>
       <p class="form-msg" aria-live="polite"></p>
       <p class="small">Pago procesado por Stripe. Al continuar aceptas las <a href="/condiciones/">condiciones de contratación</a> y la <a href="/aviso-legal/#privacidad">política de privacidad</a>. ¿Ya eres cliente? <a href="/asesorias/#acceso">Introduce tu clave</a>.</p>
     </div>

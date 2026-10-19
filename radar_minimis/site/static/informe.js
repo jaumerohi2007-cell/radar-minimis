@@ -122,6 +122,7 @@
         <p>${RM.esc(meta.attribution)}. Datos consultados en el momento indicado en el §1; los datos de la BDNS son dinámicos y pueden corregirse con posterioridad.</p>
         <p>Normativa aplicada: Reg. (UE) 2023/2831 (general), Reg. (UE) 2023/2832 (SIEG), Reg. (UE) 1408/2013 (agrícola) y Reg. (UE) 717/2014 (pesca), en sus versiones vigentes.</p>
         <p>${RM.esc(meta.disclaimer)} Este informe no es un certificado oficial ni constituye asesoramiento jurídico. Emitido por ${RM.esc(meta.owner)} mediante Radar Minimis · N.º de control ${RM.esc(ref)}.</p>
+        <p class="inf-credit">Calculado con Radar Minimis · ${RM.esc(String(meta.site || "").replace(/^https?:\/\//, ""))}/minimis/ · margen de minimis por CIF con datos de la BDNS</p>
       </footer>`;
   }
 

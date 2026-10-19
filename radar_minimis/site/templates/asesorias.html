@@ -12,14 +12,14 @@
   <div class="cell" id="acceso-estado">
     <p class="label">Contratación</p>
     <table class="kv">
-      <tr><th>Precio</th><td class="mono">{{ plan.precio }}</td></tr>
+      <tr><th>Precio</th><td><span class="mono">{{ plan.precio }}</span> tras <span class="mono">{{ plan.dias_prueba }}</span> días de prueba gratuita</td></tr>
       <tr><th>Cartera</th><td>Hasta <span class="mono">{{ plan.max_cifs }}</span> CIF de personas jurídicas</td></tr>
       <tr><th>«Única empresa»</th><td>Hasta <span class="mono">{{ pro_group_max }}</span> CIF por cliente</td></tr>
       <tr><th>Importación</th><td>CSV con columnas <span class="mono">cif;nombre;vinculadas</span></td></tr>
       <tr><th>Baja</th><td>En cualquier momento, desde el portal de cliente</td></tr>
     </table>
     <div class="actions">
-      <button type="button" class="btn" data-pro-origen="cartera_lote">{% if billing_mode == "stripe" %}Contratar · {{ plan.precio }}{% else %}Solicitar acceso anticipado{% endif %}</button>
+      <button type="button" class="btn" data-pro-origen="cartera_lote">{% if billing_mode == "stripe" %}Probar {{ plan.dias_prueba }} días gratis{% else %}Solicitar acceso anticipado{% endif %}</button>
     </div>
   </div>
   <form class="cell stack" id="acceso-form">

@@ -12,7 +12,7 @@
 <h2>2. Objeto</h2>
 <p>Acceso a un panel para guardar una cartera de hasta {{ plan.max_cifs }} CIF de personas jurídicas, calcular su margen de minimis a partir de las concesiones registradas en la BDNS, detectar concesiones nuevas entre revisiones y generar informes imprimibles por cliente. El servicio se dirige a profesionales y empresas.</p>
 <h2>3. Precio y pago</h2>
-<p>{{ plan.precio }}, con cargo recurrente mensual mediante Stripe desde la fecha de contratación. La factura detalla los impuestos aplicables. El pago se procesa en la pasarela de Stripe; el prestador no accede a los datos de la tarjeta.</p>
+<p>Los primeros {{ plan.dias_prueba }} días son de prueba gratuita. Stripe registra el método de pago al contratar, pero el primer cargo se produce al terminar la prueba; si te das de baja antes, no se cobra nada. Después, {{ plan.precio }}, con cargo recurrente mensual mediante Stripe. La factura detalla los impuestos aplicables. El pago se procesa en la pasarela de Stripe; el prestador no accede a los datos de la tarjeta.</p>
 <h2>4. Duración y baja</h2>
 <p>La suscripción se renueva cada mes hasta su baja. Puedes darte de baja en cualquier momento desde el portal de cliente (botón «Gestionar suscripción» del panel) o escribiendo a <span class="mono">{{ privacy_email }}</span>. No se cobran periodos posteriores a la baja.</p>
 <h2>5. Acceso</h2>

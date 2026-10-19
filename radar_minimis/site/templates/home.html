@@ -38,9 +38,14 @@
   <div class="cell">
     <p class="label">03 · Asesorías</p>
     <h2>Cartera de clientes</h2>
-    <p>Hasta {{ plan.max_cifs }} CIF por cuenta, revisión de toda la cartera y detección de concesiones nuevas. {{ plan.precio }}.</p>
+    <p>Hasta {{ plan.max_cifs }} CIF por cuenta, revisión de toda la cartera y detección de concesiones nuevas. {{ plan.dias_prueba }} días gratis; después, {{ plan.precio }}.</p>
     <a href="/asesorias/">Ver el panel</a>
   </div>
+</section>
+
+<section class="block">
+  <div class="block-head"><h2>Guías del régimen de minimis</h2><a href="/guias/">Todas las guías</a></div>
+  <ul class="index">{% for g in guides %}<li><a href="{{ g.path }}">{{ g.h1 }}</a></li>{% endfor %}</ul>
 </section>
 
 {% if closing %}

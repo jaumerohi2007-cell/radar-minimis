@@ -140,6 +140,8 @@ test("POST /api/checkout crea una suscripción de 19,00 €/mes con el precio de
   assert.equal(created.get("success_url"), "https://radar.test/asesorias/?session_id={CHECKOUT_SESSION_ID}");
   assert.equal(created.get("tax_id_collection[enabled]"), "true");
   assert.equal(created.get("metadata[cif]"), "B12345674");
+  assert.equal(created.get("subscription_data[trial_period_days]"), "14");
+  assert.equal(created.get("subscription_data[trial_settings][end_behavior][missing_payment_method]"), "cancel");
 
   stripeCalls = [];
   const fixed = await checkout({ request: post("/api/checkout", { origen: "informe_pdf" }), env: stripeEnv({ STRIPE_PRICE_ID: "price_fijo" }) });
@@ -177,6 +179,23 @@ test("activación: solo con pago verificado; la clave se muestra una vez y D1 gu
   assert.equal((await cuenta({ request: req("/api/cuenta", { key: nueva }), env })).status, 200);
   env.DB.db.prepare("UPDATE cuentas SET creada_en = '2020-01-01T00:00:00.000Z'").run();
   assert.equal((await activar({ request: post("/api/stripe/activar", { session_id: "cs_test_pagada0000001" }), env })).status, 409);
+});
+
+test("activación durante la prueba gratuita (sin cargo todavía)", async () => {
+  const env = stripeEnv();
+  sessions.cs_test_prueba00000001 = {
+    id: "cs_test_prueba00000001",
+    mode: "subscription",
+    status: "complete",
+    payment_status: "no_payment_required",
+    customer: "cus_2",
+    customer_details: { email: "prueba@asesoria.test" },
+    subscription: { id: "sub_2", status: "trialing" },
+  };
+  const resp = await activar({ request: post("/api/stripe/activar", { session_id: "cs_test_prueba00000001" }), env });
+  assert.equal(resp.status, 201);
+  const data = await resp.json();
+  assert.deepEqual([data.cuenta.estado, data.cuenta.activa], ["trialing", true]);
 });
 
 test("cartera en D1: solo personas jurídicas, vinculadas y tope de 100 CIF", async () => {

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Guías de ayudas de minimis para empresas y asesorías | Radar Minimis{% endblock %}
+{% block description %}Topes, cómputo de tres años, «única empresa», declaración responsable y consulta en la BDNS: guías prácticas del régimen de minimis.{% endblock %}
+{% block content %}
+<header class="doc-head">
+  <p class="kicker">Guías · Régimen de minimis</p>
+  <h1>Guías de ayudas de minimis</h1>
+  <p class="lede">Lo que hay que comprobar antes de solicitar una ayuda de minimis, con referencia al reglamento aplicable.</p>
+</header>
+<div class="scroll">
+<table class="ledger">
+  <thead><tr><th>N.º</th><th>Guía</th></tr></thead>
+  <tbody>
+  {% for g in guides %}<tr><td class="mono">{{ "%02d"|format(loop.index) }}</td><td><a href="{{ g.path }}">{{ g.h1 }}</a><small>{{ g.description }}</small></td></tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
