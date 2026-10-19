@@ -1,0 +1,73 @@
+# Piloto automático a 0 €/mes: cada día a las 06:00 UTC sincroniza la BDNS, regenera el sitio pSEO (canonical,
+# robots y sitemap apuntando a RM_SITE_URL) y publica sitio + Pages Functions + D1 en Cloudflare Pages.
+# Secrets: CLOUDFLARE_API_TOKEN («Cloudflare Pages: Edit» + «D1: Edit»), CLOUDFLARE_ACCOUNT_ID
+# Variables: CF_PAGES_PROJECT, RM_SITE_URL, RM_CONTACT_EMAIL, RM_LEGAL_OWNER, RM_PRIVACY_EMAIL,
+#            RM_GOOGLE_SITE_VERIFICATION (opcional), BILLING_MODE (opcional, validation por defecto)
+name: sync-bdns
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: sync-bdns
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      BILLING_MODE: ${{ vars.BILLING_MODE || 'validation' }}
+      RM_SITE_URL: ${{ vars.RM_SITE_URL || 'https://radar-minimis.pages.dev' }}
+      RM_API_URL: ""
+      RM_ALLOWED_ORIGINS: ${{ vars.RM_SITE_URL || 'https://radar-minimis.pages.dev' }}
+      RM_CONTACT_EMAIL: ${{ vars.RM_CONTACT_EMAIL }}
+      RM_LEGAL_OWNER: ${{ vars.RM_LEGAL_OWNER }}
+      RM_PRIVACY_EMAIL: ${{ vars.RM_PRIVACY_EMAIL }}
+      RM_GOOGLE_SITE_VERIFICATION: ${{ vars.RM_GOOGLE_SITE_VERIFICATION }}
+      HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # La base es una caché reconstruible de datos públicos: si se pierde, `daily` hace la carga inicial.
+      - name: Restaurar base de datos
+        uses: actions/cache/restore@v4
+        with:
+          path: data/radar.db
+          key: radar-db-${{ github.run_id }}
+          restore-keys: radar-db-
+
+      - run: uv sync --frozen
+      - name: Tests (Python + motor JS de Cloudflare) y estilo
+        run: uv run --frozen ruff check . && uv run --frozen pytest
+
+      - name: Sincronizar BDNS y regenerar sitio + sitemap
+        run: uv run --frozen python data_engine.py daily --max-details 4000
+
+      - name: Guardar base de datos
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/radar.db
+          key: radar-db-${{ github.run_id }}
+
+      - name: Publicar en Cloudflare Pages (sitio + Functions + D1)
+        if: env.HAS_CF_TOKEN == 'true'
+        run: npx --yes wrangler@4 pages deploy site_dist --project-name="${{ vars.CF_PAGES_PROJECT || 'radar-minimis' }}" --branch=main --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Aviso si falta el token
+        if: env.HAS_CF_TOKEN != 'true'
+        run: echo "::warning::Falta el secret CLOUDFLARE_API_TOKEN; el sitio se generó pero no se publicó."

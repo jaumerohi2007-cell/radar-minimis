@@ -1,0 +1,11 @@
+# /etc/systemd/system/radar-minimis-sync.timer
+[Unit]
+Description=Radar Minimis: tarea diaria
+
+[Timer]
+OnCalendar=*-*-* 05:30:00 Europe/Madrid
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

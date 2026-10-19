@@ -1,0 +1,25 @@
+# Blueprint de Render: alternativa a Cloudflare Pages Functions para servir la API Python a 0 €/mes.
+# Limitaciones del plan Free:
+#   - el servicio se duerme tras 15 minutos sin tráfico (el primer cálculo tarda en despertar);
+#   - el disco es efímero: la caché SQLite se reconstruye sola, pero NO es apta para guardar leads.
+#     La lista de espera debe ir a la Function /api/waitlist de Cloudflare (RM_LEADS_API_URL vacío = mismo
+#     origen que el sitio publicado en Pages).
+services:
+  - type: web
+    name: radar-minimis-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: BILLING_MODE
+        value: validation
+      - key: RM_SITE_URL
+        sync: false
+      - key: RM_API_URL
+        sync: false
+      - key: RM_ALLOWED_ORIGINS
+        sync: false
+      - key: RM_CONTACT_EMAIL
+        sync: false

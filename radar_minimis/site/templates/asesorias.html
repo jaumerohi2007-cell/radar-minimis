@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Panel de minimis para asesorías: vigila toda tu cartera | Radar Minimis{% endblock %}
+{% block description %}Controla el margen de minimis de todos tus clientes con semáforo, alertas de concesiones nuevas y convocatorias compatibles. Demo con 15 empresas.{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge minimis">Vista previa · Asesorías Pro</p>
+  <h1>Tu cartera de clientes, con el margen de minimis siempre a la vista</h1>
+  <p>Así se ve el panel con 15 CIF vigilados: semáforo según la proximidad al tope, alerta cuando se registra una concesión nueva y convocatorias abiertas compatibles con cada cliente.</p>
+  <div class="actions">
+    <button type="button" data-pro-origen="cartera_lote">Importar mi propio CSV de CIFs</button>
+    <button type="button" class="secondary" data-pro-origen="alertas_cartera">Activar alertas semanales</button>
+    <button type="button" class="secondary" data-pro-origen="informe_pdf">Generar informes de toda la cartera</button>
+  </div>
+</section>
+<p class="small"><strong>Datos de demostración:</strong> las empresas y los CIF son ficticios. Las convocatorias son reales y abiertas a {{ today|fecha }}, y se han cruzado con el motor de encaje real. Los márgenes se calculan con el mismo motor que la calculadora.</p>
+<ul class="legend">
+  <li><span class="sem sem-verde"></span> Margen holgado (&lt; {{ umbral_ambar }} % del tope más exigente)</li>
+  <li><span class="sem sem-ambar"></span> Vigilar ({{ umbral_ambar }}–{{ umbral_rojo }} %)</li>
+  <li><span class="sem sem-rojo"></span> Cerca o por encima del tope (≥ {{ umbral_rojo }} %)</li>
+</ul>
+<div id="panel-resumen" class="cards-3" aria-live="polite"></div>
+<div id="panel"></div>
+<script type="application/json" id="demo-data">{{ demo_json|safe }}</script>
+{% endblock %}
+{% block scripts %}<script src="/static/asesorias.js" defer></script>{% endblock %}

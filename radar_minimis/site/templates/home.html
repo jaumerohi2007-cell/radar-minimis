@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Radar Minimis · Calcula tu margen de minimis y encuentra ayudas abiertas{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>¿Cuánto minimis le queda a tu empresa?</h1>
+  <p>Introduce el CIF y en segundos verás las ayudas de minimis registradas en la BDNS en los últimos tres años y el margen disponible por régimen. Gratis.</p>
+  <form action="/minimis/" method="get" class="inline">
+    <label for="cif">CIF</label><input id="cif" name="cif" required pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]" placeholder="B12345674">
+    <button>Calcular margen</button>
+  </form>
+  <p class="small">¿Llevas una asesoría? <a href="/asesorias/">Mira el panel de cartera</a>: semáforo de margen y alertas de concesiones nuevas para todos tus clientes.</p>
+</section>
+
+{% if closing %}
+<h2>Cierran pronto</h2>
+<ul class="cards">
+  {% for c in closing %}<li><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }} · cierra el {{ c.fecha_fin_solicitud|fecha }}</small></li>{% endfor %}
+</ul>
+<p><a href="/ayudas/cierran-pronto/">Ver todas las que cierran pronto</a></p>
+{% endif %}
+
+<h2>Últimas convocatorias registradas</h2>
+<ul class="cards">
+  {% for c in latest %}<li><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><small>{{ c.organo_nivel3 or c.organo_nivel2 }} · {{ c.presupuesto_total|eur }}</small></li>{% endfor %}
+</ul>
+
+<h2>Explorar por comunidad y beneficiario</h2>
+<ul class="links">{% for h in hubs %}<li><a href="{{ h.path }}">{{ h.title }}</a> ({{ h.items|length }})</li>{% endfor %}</ul>
+<p class="small">{{ total }} convocatorias publicadas en este sitio.</p>
+{% endblock %}

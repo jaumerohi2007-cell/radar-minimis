@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ hub.title }}{% endblock %}
+{% block description %}{{ hub.intro }} Plazos, presupuestos y beneficiarios de cada convocatoria.{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/">Inicio</a> › {{ hub.title }}</nav>
+<h1>{{ hub.title }}</h1>
+<p>{{ hub.intro }}</p>
+<table class="list">
+  <thead><tr><th>Convocatoria</th><th>Estado</th><th>Cierre</th><th>Presupuesto</th></tr></thead>
+  <tbody>
+  {% for c in hub.items %}
+    <tr>
+      <td><a href="{{ conv_path(c) }}">{{ c.titulo }}</a><br><small>{{ c.organo_nivel3 or c.organo_nivel2 }}</small></td>
+      <td><span class="badge estado-{{ estados[c.codigo_bdns] }}">{{ estados[c.codigo_bdns]|replace("_", " ") }}</span></td>
+      <td>{{ c.fecha_fin_solicitud|fecha }}</td>
+      <td>{{ c.presupuesto_total|eur }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

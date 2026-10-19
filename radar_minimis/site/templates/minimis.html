@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Calculadora de minimis por CIF · margen disponible en 3 años | Radar Minimis{% endblock %}
+{% block description %}Consulta gratis las ayudas de minimis recibidas por una empresa (BDNS) y calcula su margen frente a los topes de 300.000 € (general), 750.000 € (SIEG), 50.000 € (agrícola) y 40.000 € (pesca).{% endblock %}
+{% block content %}
+<h1>Calculadora de minimis por CIF</h1>
+<p>Suma las ayudas de minimis registradas en la BDNS en los <strong>tres años móviles, fecha a fecha,</strong> anteriores a la fecha de referencia y calcula el margen disponible de la «única empresa».</p>
+
+<form id="minimis-form" class="stack">
+  <label for="cif">CIF de la empresa</label>
+  <input id="cif" name="cif" required pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]" placeholder="B12345674" autocomplete="off">
+  <fieldset class="linked">
+    <legend>Empresas vinculadas: matriz o filiales (opcional)</legend>
+    {% for i in range(pro_slots) %}
+    <div class="linked-row">
+      <label for="vinculada-{{ i }}" class="sr-only">CIF vinculado {{ i + 1 }}</label>
+      <input id="vinculada-{{ i }}" name="vinculada" placeholder="CIF vinculado {{ i + 1 }}" autocomplete="off" pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]">
+      {% if i + 2 > free_group_max %}<button type="button" class="tag-pro" data-pro-origen="grupo_societario" title="Grupos de más de {{ free_group_max }} CIF: Asesorías Pro">Pro</button>{% endif %}
+    </div>
+    {% endfor %}
+    <p class="small">Gratis: grupos de hasta {{ free_group_max }} CIF. Grupos mayores, en Asesorías Pro.</p>
+  </fieldset>
+  <label for="fecha">Fecha prevista de concesión de la nueva ayuda (por defecto, hoy)</label>
+  <input id="fecha" name="fecha" type="date">
+  <button>Calcular margen</button>
+</form>
+<div id="minimis-result" aria-live="polite"></div>
+
+<h2>Topes vigentes que aplica la calculadora</h2>
+<table class="list">
+  <thead><tr><th>Régimen</th><th>Tope por única empresa</th><th>Período</th><th>Base legal</th></tr></thead>
+  <tbody>
+  {% for r in rules %}
+    <tr><td>{{ r.nombre }}{% if r.nota %}<br><small>{{ r.nota }}</small>{% endif %}</td><td>{{ r.tope|eur }}</td><td>{{ r.periodo }}</td><td>{{ r.base }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h2>Cómo se cuentan los tres años</h2>
+<p>Cada nueva concesión se compara con lo concedido en los tres años previos, en cómputo continuo (considerando 11 del Reg. (UE) 2023/2831). Con fecha de referencia 19/10/2026, la ventana va del 20/10/2023 al 19/10/2026, ambos incluidos. La ayuda cuenta desde que se concede, no desde que se paga (art. 3.3). Un 29 de febrero retrocede al 28.</p>
+<h2>«Única empresa»</h2>
+<p class="notice">{{ unica_empresa }}</p>
+<p class="small">{{ criterio_acumulacion }} Las personas físicas (autónomos) no aparecen: la BDNS no permite reutilizar sus datos con fines comerciales.</p>
+{% endblock %}
+{% block scripts %}<script src="/static/minimis.js" defer></script>{% endblock %}

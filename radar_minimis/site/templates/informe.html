@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Informe de minimis para expediente | Radar Minimis{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="inf-toolbar no-print">
+  <a href="/minimis/">← Volver a la calculadora</a>
+  <button type="button" id="inf-print" disabled>Imprimir / Guardar como PDF</button>
+  <button type="button" class="secondary" data-pro-origen="informe_pdf">Informes de toda tu cartera, con tu logo</button>
+</div>
+<article id="informe" class="inf" aria-live="polite"><p>Consultando la BDNS…</p></article>
+<template id="inf-meta"
+  data-attribution="{{ attribution }}"
+  data-disclaimer="{{ disclaimer }}"
+  data-updated="{{ updated }}"></template>
+{% endblock %}
+{% block scripts %}<script src="/static/informe.js" defer></script>{% endblock %}

@@ -1,0 +1,23 @@
+# /etc/systemd/system/radar-minimis-api.service
+[Unit]
+Description=Radar Minimis API (FastAPI/uvicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=radar
+Group=radar
+WorkingDirectory=/opt/radar-minimis
+EnvironmentFile=/opt/radar-minimis/.env
+ExecStart=/opt/radar-minimis/.venv/bin/python data_engine.py serve --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+# Endurecimiento: solo puede escribir en su carpeta de datos.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/radar-minimis/data
+
+[Install]
+WantedBy=multi-user.target

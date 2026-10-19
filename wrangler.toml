@@ -1,0 +1,22 @@
+# Cloudflare Pages: sitio estático (site_dist/) + Pages Functions (functions/) + D1. Coste en el plan Free: 0 €/mes.
+# Límites Free relevantes: 100.000 peticiones/día a Functions, D1 con 5 GB, 5 M lecturas y 100.000 escrituras/día.
+name = "radar-minimis"
+pages_build_output_dir = "site_dist"
+compatibility_date = "2025-09-01"
+
+[vars]
+BILLING_MODE = "validation"        # "stripe" solo tras el alta fiscal (y con la API Python para las cuentas)
+FREE_LOOKUPS_PER_DAY = "10"
+FREE_GROUP_MAX_CIFS = "2"
+TOPE_PESCA_EUR = "40000"           # España: RD 1139/2024 (art. 3.2 bis Reg. 717/2014); 30000 = régimen base
+STRIPE_PAYMENT_LINK = ""
+SITE_URL = "https://radar-minimis.pages.dev"
+CONTACT_EMAIL = "jaumeroig.dev@gmail.com"
+RM_LEGAL_OWNER = "Jaume Roig Hidalgo"
+RM_PRIVACY_EMAIL = "jaumeroig.dev@gmail.com"
+# IP_SALT es un secreto: npx wrangler@4 pages secret put IP_SALT --project-name radar-minimis
+
+[[d1_databases]]
+binding = "DB"
+database_name = "radar-minimis-db"
+database_id = "b34ba41b-62fc-4511-8793-ca4d7dc87cea"

@@ -1,0 +1,104 @@
+{
+  "_descripcion": "Casos calculados a mano. Los usan tests/test_golden.py (Python) y tests/js/core.test.js (Cloudflare) para garantizar que ambos motores dan el mismo resultado.",
+  "casos": [
+    {
+      "nombre": "ventana_fecha_a_fecha",
+      "referencia": "2026-10-19",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2023-10-19", "importe": 10000, "reglamento": "REG (UE) 2023/2831 de minimis, General"},
+        {"id": "2", "cif": "B12345674", "fecha": "2023-10-20", "importe": 20000, "reglamento": "REG (UE) 2023/2831 de minimis, General"}
+      ],
+      "esperado": {"ventana_desde": "2023-10-20", "ventana_hasta": "2026-10-19", "margen_general_eur": 280000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 20000, "margen_eur": 280000}, "sieg": {"usado_eur": 20000, "margen_eur": 730000}}}
+    },
+    {
+      "nombre": "bisiesto_referencia_29_feb",
+      "referencia": "2028-02-29",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2025-02-28", "importe": 5000, "reglamento": "REG (UE) 2023/2831 de minimis, General"},
+        {"id": "2", "cif": "B12345674", "fecha": "2025-03-01", "importe": 7000, "reglamento": "REG (UE) 2023/2831 de minimis, General"}
+      ],
+      "esperado": {"ventana_desde": "2025-03-01", "margen_general_eur": 293000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 7000, "margen_eur": 293000}}}
+    },
+    {
+      "nombre": "ventana_incluye_29_feb_2024",
+      "referencia": "2027-02-28",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2024-02-28", "importe": 1000, "reglamento": "REG (UE) 2023/2831 de minimis, General"},
+        {"id": "2", "cif": "B12345674", "fecha": "2024-02-29", "importe": 2000, "reglamento": "REG (UE) 2023/2831 de minimis, General"}
+      ],
+      "esperado": {"ventana_desde": "2024-02-29", "margen_general_eur": 298000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 2000, "margen_eur": 298000}}}
+    },
+    {
+      "nombre": "agricola_suma_al_general",
+      "referencia": "2026-10-19",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2025-06-01", "importe": 45000, "reglamento": "REG (UE) 1408/2013 de minimis, Agrícola"},
+        {"id": "2", "cif": "B12345674", "fecha": "2026-01-10", "importe": 200000, "reglamento": "REG (UE) 2023/2831 de minimis, General"}
+      ],
+      "esperado": {"margen_general_eur": 55000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 245000, "margen_eur": 55000}, "agricola": {"usado_eur": 45000, "margen_eur": 5000}}}
+    },
+    {
+      "nombre": "pesca_ejercicios_fiscales",
+      "referencia": "2026-10-19",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2023-12-31", "importe": 30000, "reglamento": "REG (UE) 717/2014 de minimis, Pesca"},
+        {"id": "2", "cif": "B12345674", "fecha": "2024-02-01", "importe": 5000, "reglamento": "REG (UE) 717/2014 de minimis, Pesca"}
+      ],
+      "esperado": {"margen_general_eur": 265000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 35000, "margen_eur": 265000}, "pesca": {"usado_eur": 5000, "margen_eur": 35000}}}
+    },
+    {
+      "nombre": "pesca_tope_base_30000",
+      "referencia": "2026-10-19",
+      "tope_pesca": 30000,
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2025-03-01", "importe": 28000, "reglamento": "REG (UE) 717/2014 de minimis, Pesca"}
+      ],
+      "esperado": {"margen_general_eur": 272000, "regimenes": {"pesca": {"usado_eur": 28000, "margen_eur": 2000}}}
+    },
+    {
+      "nombre": "sieg_criterio_prudente",
+      "referencia": "2026-10-19",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2025-01-01", "importe": 100000, "reglamento": "REG (UE) 2023/2831 de minimis, General"},
+        {"id": "2", "cif": "B12345674", "fecha": "2025-05-01", "importe": 600000, "reglamento": "REG (UE) 2023/2832 de minimis, SIEG"}
+      ],
+      "esperado": {"margen_general_eur": 50000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 100000, "margen_eur": 50000}, "sieg": {"usado_eur": 700000, "margen_eur": 50000}}}
+    },
+    {
+      "nombre": "unica_empresa_tres_cifs",
+      "referencia": "2026-10-19",
+      "cifs": ["B12345674", "A11111119", "B00000000"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2025-01-01", "importe": 100000, "reglamento": "REG (UE) 2023/2831 de minimis, General"},
+        {"id": "2", "cif": "A11111119", "fecha": "2025-06-01", "importe": 90000, "reglamento": "REG (UE) 2023/2831 de minimis, General"},
+        {"id": "3", "cif": "B00000000", "fecha": "2026-02-01", "importe": 50000, "reglamento": "REG (UE) 1407/2013 de minimis, General"},
+        {"id": "4", "cif": "Q2826000H", "fecha": "2026-02-01", "importe": 99999, "reglamento": "REG (UE) 2023/2831 de minimis, General"}
+      ],
+      "esperado": {"margen_general_eur": 60000, "tope_superado": false,
+                   "regimenes": {"general": {"usado_eur": 240000, "margen_eur": 60000}}}
+    },
+    {
+      "nombre": "tope_superado",
+      "referencia": "2026-10-19",
+      "cifs": ["B12345674"],
+      "concesiones": [
+        {"id": "1", "cif": "B12345674", "fecha": "2025-01-01", "importe": 310000, "reglamento": "REG (UE) 2023/2831 de minimis, General"}
+      ],
+      "esperado": {"margen_general_eur": 0, "tope_superado": true,
+                   "regimenes": {"general": {"usado_eur": 310000, "margen_eur": 0}}}
+    }
+  ]
+}

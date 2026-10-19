@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Aviso legal, privacidad y condiciones | Radar Minimis{% endblock %}
+{% block content %}
+<h1>Aviso legal, privacidad y condiciones</h1>
+<h2>Titular</h2>
+<p>{{ legal_owner }}. Contacto: {{ privacy_email }}.</p>
+<h2>Origen y reutilización de los datos</h2>
+<p>{{ attribution }}. Los datos se reutilizan conforme a la Ley 37/2007 sobre reutilización de la información del sector público y a las condiciones generales publicadas en el portal del SNPSAP. Se indica la fecha de última actualización ({{ updated }}) y no se alteran los metadatos de origen.</p>
+<p>{{ disclaimer }}</p>
+<h2 id="privacidad">Privacidad</h2>
+<ul>
+  <li><strong>Consultas por CIF:</strong> solo se admiten personas jurídicas. No se muestran ni se reutilizan datos de personas físicas.</li>
+  <li><strong>Lista de acceso anticipado:</strong> si la solicitas, guardamos tu email, el número aproximado de empresas que gestionas, el CIF consultado (si lo había), qué botón usaste y la fecha. La finalidad es avisarte del acceso anticipado. La base jurídica es tu consentimiento, que puedes retirar en cualquier momento. No se ceden a terceros y se borran al terminar la fase de acceso anticipado o cuando lo pidas.</li>
+  <li><strong>Derechos:</strong> acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a {{ privacy_email }}. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</li>
+  <li><strong>Medición y abuso:</strong> contamos de forma agregada por día cuántas veces se usa cada función. No usamos cookies. Para limitar abusos usamos un identificador cifrado de tu IP con una clave que cambia cada día; no permite recuperar la IP y se descarta al día siguiente.</li>
+</ul>
+<h2>Alcance de los cálculos</h2>
+<p>El margen de minimis es orientativo. Solo incluye ayudas registradas en la BDNS y depende de que se indiquen todas las empresas vinculadas. El informe no es un certificado oficial, no constituye asesoramiento jurídico y no sustituye la declaración responsable del solicitante.</p>
+{% endblock %}

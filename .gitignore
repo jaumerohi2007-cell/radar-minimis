@@ -1,0 +1,18 @@
+.venv/
+.cache/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+data/
+site_dist/
+site_dist.tmp/
+*.db
+*.db-wal
+*.db-shm
+.wrangler/
+node_modules/
+# Exportaciones de leads: contienen emails (datos personales)
+leads*.json
+leads*.csv
+*.log

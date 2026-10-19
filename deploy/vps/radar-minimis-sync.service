@@ -1,0 +1,20 @@
+# /etc/systemd/system/radar-minimis-sync.service — lo dispara radar-minimis-sync.timer
+[Unit]
+Description=Radar Minimis: sync BDNS, alertas de cartera y copia de seguridad
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=radar
+Group=radar
+WorkingDirectory=/opt/radar-minimis
+EnvironmentFile=/opt/radar-minimis/.env
+ExecStart=/opt/radar-minimis/.venv/bin/python data_engine.py sync --max-details 4000
+ExecStart=/opt/radar-minimis/.venv/bin/python data_engine.py sync-cartera
+ExecStart=/opt/radar-minimis/deploy/vps/backup.sh
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/radar-minimis/data /var/backups/radar-minimis

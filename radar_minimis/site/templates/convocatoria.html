@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ conv.titulo[:90] }} | BDNS {{ conv.codigo_bdns }}{% endblock %}
+{% block description %}{{ conv.titulo[:120] }}. {{ conv.organo_nivel3 or conv.organo_nivel2 }}. Plazo: {{ conv.fecha_fin_solicitud|fecha }}. Presupuesto: {{ conv.presupuesto_total|eur }}. Beneficiarios, requisitos y enlace oficial.{% endblock %}
+{% block head %}<script type="application/ld+json">{{ jsonld|safe }}</script>{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/">Inicio</a> › Convocatoria BDNS {{ conv.codigo_bdns }}</nav>
+<article class="conv">
+  <h1>{{ conv.titulo }}</h1>
+  <p class="badges">
+    <span class="badge estado-{{ estado }}">{{ {"abierta": "Abierta", "cerrada": "Cerrada", "proxima": "Próximamente", "sin_plazo": "Plazo no publicado"}[estado] }}</span>
+    {% if dias is not none %}<span class="badge">Cierra en {{ dias }} día{{ "" if dias == 1 else "s" }}</span>{% endif %}
+    {% if conv.is_minimis %}<span class="badge minimis">Sujeta a minimis</span>{% endif %}
+    {% if conv.mrr %}<span class="badge">Fondos MRR</span>{% endif %}
+  </p>
+
+  {% if conv.is_minimis %}
+  <section class="cta">
+    <h2>¿Le queda margen de minimis a tu empresa?</h2>
+    <p>Antes de solicitarla tendrás que declarar las ayudas de minimis de los últimos tres años. Compruébalo en segundos con tu CIF.</p>
+    <form action="/minimis/" method="get" class="inline"><label for="cif">CIF</label><input id="cif" name="cif" required pattern="[A-Za-z][0-9]{7}[0-9A-Ja-j]" placeholder="B12345674"><button>Calcular margen</button></form>
+  </section>
+  {% endif %}
+
+  <table class="facts">
+    <tr><th>Órgano convocante</th><td>{{ conv.organo_nivel3 }}{% if conv.organo_nivel2 and conv.organo_nivel2 != conv.organo_nivel3 %} ({{ conv.organo_nivel2 }}){% endif %}</td></tr>
+    <tr><th>Administración</th><td>{{ conv.organo_nivel1|capitalize }}</td></tr>
+    <tr><th>Presupuesto total</th><td>{{ conv.presupuesto_total|eur }}</td></tr>
+    <tr><th>Plazo de solicitud</th><td>{{ conv.fecha_inicio_solicitud|fecha }} – {{ conv.fecha_fin_solicitud|fecha }}{% if conv.texto_fin %}<br><small>{{ conv.texto_fin }}</small>{% endif %}</td></tr>
+    <tr><th>Tipo de convocatoria</th><td>{{ conv.tipo_convocatoria or "—" }}</td></tr>
+    <tr><th>Instrumento</th><td>{{ conv.instrumentos|join(", ") or "—" }}</td></tr>
+    <tr><th>Beneficiarios</th><td>{{ conv.tipos_beneficiario|join("; ") or "Sin información específica" }}</td></tr>
+    <tr><th>Finalidad</th><td>{{ conv.finalidad or "—" }}</td></tr>
+    <tr><th>Sectores (CNAE)</th><td>{% for code, name in conv.sectores %}{{ code }} {{ name }}{% if not loop.last %}<br>{% endif %}{% else %}Sin restricción publicada{% endfor %}</td></tr>
+    <tr><th>Ámbito territorial</th><td>{% for code, name in conv.regiones %}{{ name or code }}{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}</td></tr>
+    <tr><th>Fecha de registro en la BDNS</th><td>{{ conv.fecha_recepcion|fecha }}</td></tr>
+  </table>
+
+  {% if conv.bases_reguladoras %}<h2>Bases reguladoras</h2><p>{{ conv.bases_reguladoras }}</p>{% endif %}
+
+  <h2>Enlaces oficiales</h2>
+  <ul>
+    <li><a href="{{ conv.url_oficial }}" rel="nofollow noopener">Ficha oficial en la BDNS ({{ conv.codigo_bdns }})</a></li>
+    {% if conv.url_bases %}<li><a href="{{ conv.url_bases }}" rel="nofollow noopener">Bases reguladoras</a></li>{% endif %}
+    {% if conv.sede_electronica %}<li><a href="{{ conv.sede_electronica }}" rel="nofollow noopener">Sede electrónica para solicitarla</a></li>{% endif %}
+  </ul>
+
+  <h2>Preguntas frecuentes</h2>
+  <dl class="faq">
+    <dt>¿Quién puede pedir esta ayuda?</dt>
+    <dd>{{ conv.tipos_beneficiario|join("; ") or "La BDNS no especifica el tipo de beneficiario; consulta las bases." }}</dd>
+    <dt>¿Hasta cuándo se puede solicitar?</dt>
+    <dd>{% if conv.fecha_fin_solicitud %}Hasta el {{ conv.fecha_fin_solicitud|fecha }}{% if conv.texto_fin %} ({{ conv.texto_fin }}){% endif %}.{% else %}La BDNS no publica una fecha de cierre; revisa el extracto oficial.{% endif %}</dd>
+    <dt>¿Es una ayuda de minimis?</dt>
+    <dd>{% if conv.is_minimis %}Sí, según los datos publicados. <a href="/minimis/">Calcula tu margen disponible</a>.{% else %}Los datos publicados no lo indican; confírmalo en las bases reguladoras.{% endif %}</dd>
+  </dl>
+
+  {% if links %}
+  <h2>Más ayudas relacionadas</h2>
+  <ul class="links">{% for href, title in links %}<li><a href="{{ href }}">{{ title }}</a></li>{% endfor %}</ul>
+  {% endif %}
+</article>
+{% endblock %}

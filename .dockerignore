@@ -1,0 +1,17 @@
+.venv/
+.cache/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+.env
+data/
+site_dist/
+site_dist.tmp/
+tests/
+functions/
+cloudflare/
+d1/
+deploy/
+.github/
+node_modules/
+.wrangler/
